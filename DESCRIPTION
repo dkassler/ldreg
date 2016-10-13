@@ -13,4 +13,5 @@ Imports:
     magrittr,
     MASS,
     Matrix,
+    pacman,
     sparseMVN
