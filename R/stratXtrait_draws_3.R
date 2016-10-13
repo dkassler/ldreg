@@ -1,10 +1,7 @@
-library(magrittr)
-library(Matrix)
-
 study <- function(N, .cov) {
   N_snp <- nrow(.cov)
   if ("dsCMatrix" %in% class(.cov)) {
-    sparseMVN::rmvn.sparse(N, mu = integer(N_snp), CH = Cholesky(.cov), prec = FALSE)
+    sparseMVN::rmvn.sparse(N, mu = integer(N_snp), CH = Matrix::Cholesky(.cov), prec = FALSE)
   } else {
     MASS::mvrnorm(N, mu = integer(N_snp), Sigma = .cov)
   }
@@ -15,8 +12,8 @@ make_cat_mats <- function(N_cat) {
     N_cat,
     simplify = FALSE,
     clusterGeneration::genPositiveDefMat(
-      "unifcorrmat", 
-      dim = 2, 
+      "unifcorrmat",
+      dim = 2,
       rangeVar = 0:1
     )$Sigma
   )
@@ -37,25 +34,25 @@ draw_snp_effs <- function(N_snp, cat_mems, cat_mats) {
   }))
 }
 
-sim1 <- function(.cov, N1, N2, Ns, N_refpop, 
+sim1 <- function(.cov, N1, N2, Ns, N_refpop,
                  cat_mems, cat_mats, ...) {
   N_snp <- nrow(.cov)
   N_cat <- length(cat_mems)
-  
+
   refpop <- study(N_refpop, .cov)
   tot_samp <- N1 + N2 - Ns
   sample <- study(tot_samp, .cov)
   sample1 <- sample[1:N1, ]
   sample2 <- sample[c(1:Ns, (N1 + 1):tot_samp), ]
-  
+
   snp_effs <- draw_snp_effs(N_snp, cat_mems, cat_mats)
   #snp_effs %<>% scale()
-  
+
   eff_cov <- lapply(1:N_cat, function(.) cat_mats[[.]] * length(cat_mems[[.]]))
   eff_cov <- Reduce(`+`, eff_cov)
   y1 <- sample1 %*% snp_effs[,1] + rnorm(N1, 0, sqrt(1 - eff_cov[1,1]))
   y2 <- sample2 %*% snp_effs[,2] + rnorm(N2, 0, sqrt(1 - eff_cov[2,2]))
-  
+
   z1 <- (t(sample1) %*% y1) / sqrt(N1)
   z2 <- (t(sample2) %*% y2) / sqrt(N2)
   r <- refpop %>% {t(.) %*% .} / N_refpop
@@ -68,10 +65,10 @@ rand_sim_data <- function(
   N2 = NULL,
   Ns,
   N_refpop,
-  .cov = NULL, 
+  .cov = NULL,
   cat_sizes = NULL,
   cat_props = c(1, .25, .4),
-  cat_mems = NULL, 
+  cat_mems = NULL,
   cat_mats = NULL,
   shrink = TRUE
 ) {
@@ -85,7 +82,7 @@ rand_sim_data <- function(
   if (is.null(cat_mems)) cat_mems <- make_cat_mems(N_snp, cat_sizes)
   if (is.null(cat_mats)) cat_mats <- make_cat_mats(length(cat_sizes))
   if (shrink) cat_mats %<>% lapply(divide_by, sum(cat_sizes))
-  
+
   list(
     .cov = .cov,
     N1 = N1,

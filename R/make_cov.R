@@ -1,5 +1,3 @@
-library(Matrix)
-
 make_cov.bdiag <- function(N, size, blk = 1) {
   dblock <- function(n, fill = blk) {
     m <- matrix(fill, nrow = n, ncol = n)
@@ -13,6 +11,6 @@ make_cov.bdiag <- function(N, size, blk = 1) {
     z[-1]
   }
   blocks <- lapply(blocksize(N, round(N / size)), dblock)
-  bdiag(blocks)
+  Matrix::bdiag(blocks)
 }
 
