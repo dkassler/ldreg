@@ -1,7 +1,7 @@
-progress_bar <- function(N, width = 100) {
+progress_bar <- function(N, width = 80) {
   progress::progress_bar$new(
     format = sprintf(
-      "Completed :current of %s [:bar] :percent in :elapsed | :eta left",
+      "[:bar] :current of %s, :percent in :elapsed | :eta left",
       N
     ),
     total = N,
