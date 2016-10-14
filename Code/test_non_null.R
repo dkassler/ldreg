@@ -1,17 +1,22 @@
 # For this process, you need to allocate at least 800 MB of RAM per worker.
 
 library(ldreg)
+library(magrittr)
 pacman::p_load(doSNOW, progress)
 
-N_cores <- 4
+N_cores <- 1
 size <- 100
+x1_test <- 10
+
+packs <- c("ldreg", "magrittr")
 
 cl <- makeCluster(N_cores)
 registerDoSNOW(cl)
 
-pb <- progress_bar(1000)
+pb <- progress_bar(x1_test)
 x1s <- foreach(
-  i = 1:1000,
+  i = 1:x1_test,
+  .packages = packs,
   .options.snow = list(progress = function(n) pb$tick())
 ) %dopar% {
   set.seed(i)
@@ -31,6 +36,8 @@ x1 <- x1s[[sel1]]
 pb <- progress_bar(100)
 jack_res <- foreach(
   1:100,
+  .packages = packs,
+  .export = "x1",
   .options.snow = list(progress = function(n) pb$tick())
 ) %dopar% {
   x2 <- do.call(sim1, x1)
@@ -44,20 +51,20 @@ stopCluster(cl)
 
 saveRDS(jack_res, "jack_raw_nonnull_10K.rds")
 
-rm(list = ls())
-
 cl <- makeCluster(N_cores)
 registerDoSNOW(cl)
 
 x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size, Ns = round(0.3 * size),
                     cat_props = c(1, 0.4))
-x1$cat_mats <- matrix(c(0.8, 0, 0, 0.5), nrow = 2)
+x1$cat_mats[[2]] <- matrix(c(0.8, 0, 0, 0.5), nrow = 2)
 
 pb <- progress_bar(100)
 jack_res <- foreach(
   1:100,
+  .packages = packs,
+  .export = "x1",
   .options.snow = list(progress = function(n) pb$tick())
-) %dopar% {
+) %do% {
   x2 <- do.call(sim1, x1)
   list(
     jack = do.call(jackknife, c(x2, x1)),
