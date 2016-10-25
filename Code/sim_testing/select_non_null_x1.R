@@ -4,7 +4,7 @@ library(magrittr)
 pacman::p_load(doSNOW, progress)
 
 N_cores <- parallel::detectCores()
-size <- 100
+size <- 10000
 x1_test <- 1000
 
 cl <- makeCluster(N_cores)
