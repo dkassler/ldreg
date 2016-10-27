@@ -23,14 +23,14 @@ getfit <- function(z1, z2, r, cat_mems, N1, N2, weighted = FALSE, ...) {
   tau1 <- getfit_strat(z1^2, r, cat_mems, N1)
   tau2 <- getfit_strat(z2^2, r, cat_mems, N2)
 
-  upsilon / (tau1 * tau2)
+  upsilon / sqrt(abs(tau1 * tau2))
 }
 
 getfit.list <- function(x) {
   getfit(x$z1, x$z2, x$r, x$cat_mems)
 }
 
-jackknife <- function(z1, z2, r, cat_mems, N1, N2, blocks = 10,
+jackknife <- function(z1, z2, r, cat_mems, N1, N2, blocks = 20,
                       weighted = FALSE, ...) {
   num_jblks <- blocks
   N_snp <- dim(r)[1]
