@@ -10,8 +10,9 @@ size <- 10000
 
 x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
                     Ns = round(0.3 * size))
-x1$cat_mats[[2]][matrix(c(F, T, T, F), nrow = 2)] <- 0
-x1$cat_mats[[3]][matrix(c(F, T, T, F), nrow = 2)] <- 0
+x1$cat_mats[[1]] <- matrix(c(0.7, 0, 0, 0.7), nrow = 2)
+x1$cat_mats[[2]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2)
+x1$cat_mats[[3]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2)
 
 x2 <- do.call(sim1, x1)
 jack <- do.call(jackknife, c(x2, x1))
