@@ -7,7 +7,6 @@ library(ldreg)
 library(magrittr)
 
 size <- 10000
-x1_test <- 10
 
 #938 (/1000) for size 100
 x1_seed <- if (size == 100) {
@@ -22,7 +21,7 @@ set.seed(NULL)
 
 x2 <- do.call(sim1, x1)
 jack <- do.call(jackknife, c(x2, x1, list(blocks = 20)))
-jack_wt <- do.call(jackknife, c(x2, x1, list(weighted = TRUE, list(blocks = 20))))
+jack_wt <- do.call(jackknife, c(x2, x1, list(weighted = TRUE, blocks = 20)))
 
 # x2s <- pbreplicate(100, simplify = FALSE, do.call(sim1, x1))
 # jack <- lapply(x2s, function(x2) do.call(jackknife, c(x2, x1)))

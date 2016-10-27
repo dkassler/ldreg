@@ -30,7 +30,7 @@ getfit.list <- function(x) {
   getfit(x$z1, x$z2, x$r, x$cat_mems)
 }
 
-closest <- function(x, target) which(abs(x - target) == min(abs(x - target)))
+closest <- function(x, target) which(abs(x - target) == min(abs(x - target)))[1]
 
 find_jblks <- function(r, blocks) {
   # subdiag <- diag(r[-1, -nrow(r)])
@@ -43,7 +43,7 @@ find_jblks <- function(r, blocks) {
   cuts <- subdiag_min[sapply(targets, closest, x = subdiag_min)]
   cuts <- unique(cuts)
 
-  sapply(1:20, function(x) sum(x > cuts)) + 1
+  sapply(1:N_snp, function(x) sum(x > cuts)) + 1
 }
 
 jackknife <- function(z1, z2, r, cat_mems, N1, N2, blocks = 20,
@@ -52,6 +52,7 @@ jackknife <- function(z1, z2, r, cat_mems, N1, N2, blocks = 20,
   N_snp <- dim(r)[1]
   #jblk_ind <- cut(1:N_snp, num_jblks, labels = FALSE)
   jblk_ind <- find_jblks(r, num_jblks)
+  num_jblks <- length(unique(jblk_ind))
   jblk_size <- tapply(jblk_ind, jblk_ind, length)
 
   jk_reps <- unname(lapply(1:num_jblks, function(i) {
