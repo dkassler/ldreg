@@ -20,8 +20,8 @@ x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
 set.seed(NULL)
 
 x2 <- do.call(sim1, x1)
-jack <- do.call(jackknife, c(x2, x1, list(blocks = 20)))
-jack_wt <- do.call(jackknife, c(x2, x1, list(weighted = TRUE, blocks = 20)))
+jack <- do.call(jackknife, c(x2, x1, blocks = 200))
+jack_wt <- do.call(jackknife, c(x2, x1, weighted = TRUE, blocks = 200))
 
 # x2s <- pbreplicate(100, simplify = FALSE, do.call(sim1, x1))
 # jack <- lapply(x2s, function(x2) do.call(jackknife, c(x2, x1)))

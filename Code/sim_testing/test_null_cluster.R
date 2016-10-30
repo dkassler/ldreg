@@ -10,13 +10,13 @@ size <- 10000
 
 x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
                     Ns = round(0.3 * size))
-x1$cat_mats[[1]] <- matrix(c(0.7, 0, 0, 0.7), nrow = 2)
-x1$cat_mats[[2]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2)
-x1$cat_mats[[3]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2)
+x1$cat_mats[[1]] <- matrix(c(0.7, 0, 0, 0.7), nrow = 2) / sum(sapply(x1$cat_mems, length))
+x1$cat_mats[[2]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2) / sum(sapply(x1$cat_mems, length))
+x1$cat_mats[[3]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2) / sum(sapply(x1$cat_mems, length))
 
 x2 <- do.call(sim1, x1)
-jack <- do.call(jackknife, c(x2, x1))
-jack_wt <- do.call(jackknife, c(x2, x1, list(weighted = TRUE)))
+jack <- do.call(jackknife, c(x2, x1, blocks = 200))
+jack_wt <- do.call(jackknife, c(x2, x1, weighted = TRUE, blocks = 200))
 
 # x2s <- pbreplicate(100, simplify = FALSE, do.call(sim1, x1))
 # jack <- lapply(x2s, function(x2) do.call(jackknife, c(x2, x1)))
