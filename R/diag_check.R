@@ -2,8 +2,8 @@ blkmean <- function(mat, k, d, r) {
   j <- k + d
   kbd <- max(1, k - r)
   jbd <- min(j + r, nrow(mat))
-  ksel <- between(1:ncol(mat), kbd, k)
-  jsel <- between(1:nrow(mat), j, jbd)
+  ksel <- dplyr::between(1:ncol(mat), kbd, k)
+  jsel <- dplyr::between(1:nrow(mat), j, jbd)
   submat <- mat[jsel, ksel]
   submat <- abs(submat)
   mean(submat)
