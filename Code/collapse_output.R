@@ -4,13 +4,22 @@ library(methods)
 library(foreach)
 
 if (length(script_args) < 1) stop("Script run without any arguments")
-formstr <- script_args[[1]]
+path_arg <- script_args[[1]]
 
-out <- foreach(i = 1:100) %do% {
-  filename <- sprintf(formstr, i)
+dir_filenames <- dir(dirname(path_arg))
+filenames <- grep(glob2rx(basename(path_arg)), dir_filenames, value = T)
+
+out <- foreach(name = filenames) %do% {
+  filename <- file.path(dirname(path_arg), name)
   out <- readRDS(filename)
   file.remove(filename)
   out
 }
 
-saveRDS(out, sprintf(formstr, "all"))
+outname <- if (length(script_args) > 1) {
+  script_args[[2]]
+} else {
+  gsub("\\*", "all", path_arg)
+}
+
+saveRDS(out, outname)
