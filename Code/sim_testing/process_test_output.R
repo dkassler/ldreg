@@ -1,6 +1,8 @@
-jack <- readRDS("Code/sim_testing/test_non_null.output.jack.all.rds")
+jack <- readRDS("Code/sim_testing/test_null.output.jack.all.rds")
 
 library(dplyr)
+
+jack <- jack[sapply(jack, . %>% class %>% identical("list"))]
 
 jack %>%
   sapply(function(x) {
