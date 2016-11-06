@@ -1,5 +1,12 @@
-getfit_strat <- function(chi2, r, cat_mems, N, ...) {
-  ld <- lapply(cat_mems, function(.) colSums((r^2)[.,]))
+getfit_strat <- function(chi2, r, cat_mems, N,
+                         bias_correction = TRUE, ...) {
+  r_squared <- if (bias_correction) {
+    r^2 - 1/N_refpop
+  } else {
+    r^2
+  }
+
+  ld <- lapply(cat_mems, function(.) colSums(r_squared[.,]))
   dat <- as.data.frame(ld)
   names(dat) <- paste0("ld", 1:length(ld))
   rhs <- paste(names(dat), collapse = "+")
@@ -10,13 +17,20 @@ getfit_strat <- function(chi2, r, cat_mems, N, ...) {
   tau
 }
 
-getfit <- function(z1, z2, r, cat_mems, N1, N2, N_refpop, weighted = FALSE, ...) {
-  ld <- lapply(cat_mems, function(.) colSums((r^2 - 1/N_refpop)[.,]))
+getfit <- function(z1, z2, r, cat_mems, N1, N2, N_refpop,
+                   weighted = FALSE, bias_correction = TRUE, ...) {
+  r_squared <- if (bias_correction) {
+    r^2 - 1/N_refpop
+  } else {
+    r^2
+  }
+
+  ld <- lapply(cat_mems, function(.) colSums(r_squared[.,]))
   dat <- as.data.frame(ld)
   names(dat) <- paste0("ld", 1:length(ld))
   rhs <- paste(names(dat), collapse = "+")
   dat$zz <- z1 * z2
-  wt <- if (weighted) {1 / (var(dat$zz) * colSums(r^2 - 1 / N_refpop))} else NULL
+  wt <- if (weighted) {1 / (var(dat$zz) * colSums(r_squared))} else NULL
   fit <- lm(data = dat, formula(paste0("zz ~ ", rhs)), weights = wt)
   upsilon <- coef(fit)[-1] / sqrt(N1 * N2)
 
