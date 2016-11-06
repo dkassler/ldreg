@@ -10,7 +10,7 @@ getfit_strat <- function(chi2, r, cat_mems, N, ...) {
   tau
 }
 
-getfit <- function(z1, z2, r, cat_mems, N1, N2, weighted = FALSE, ...) {
+getfit <- function(z1, z2, r, cat_mems, N1, N2, N_refpop, weighted = FALSE, ...) {
   ld <- lapply(cat_mems, function(.) colSums((r^2 - 1/N_refpop)[.,]))
   dat <- as.data.frame(ld)
   names(dat) <- paste0("ld", 1:length(ld))
@@ -20,10 +20,12 @@ getfit <- function(z1, z2, r, cat_mems, N1, N2, weighted = FALSE, ...) {
   fit <- lm(data = dat, formula(paste0("zz ~ ", rhs)), weights = wt)
   upsilon <- coef(fit)[-1] / sqrt(N1 * N2)
 
-  tau1 <- getfit_strat(z1^2, r, cat_mems, N1)
-  tau2 <- getfit_strat(z2^2, r, cat_mems, N2)
+  return(upsilon)
 
-  upsilon / sqrt(abs(tau1 * tau2))
+  # tau1 <- getfit_strat(z1^2, r, cat_mems, N1)
+  # tau2 <- getfit_strat(z2^2, r, cat_mems, N2)
+  #
+  # upsilon / sqrt(abs(tau1 * tau2))
 }
 
 getfit.list <- function(x) {
@@ -46,7 +48,7 @@ find_jblks <- function(r, blocks) {
   sapply(1:N_snp, function(x) sum(x > cuts)) + 1
 }
 
-jackknife <- function(z1, z2, r, cat_mems, N1, N2, blocks = 20,
+jackknife <- function(z1, z2, r, cat_mems, N1, N2, N_refpop, blocks = 20,
                       weighted = FALSE, ...) {
   num_jblks <- blocks
   N_snp <- dim(r)[1]
@@ -62,10 +64,10 @@ jackknife <- function(z1, z2, r, cat_mems, N1, N2, blocks = 20,
       x <- .[. %in% sel]
       sapply(x, function(y) y - sum(unsel < y))
     })
-    getfit(z1[sel], z2[sel], r[sel, sel], cat_mems_sel, N1, N2,
+    getfit(z1[sel], z2[sel], r[sel, sel], cat_mems_sel, N1, N2, N_refpop,
            weighted = weighted)
   }))
-  upsilon_hat <- getfit(z1, z2, r, cat_mems, N1, N2, weighted = weighted)
+  upsilon_hat <- getfit(z1, z2, r, cat_mems, N1, N2, N_refpop, weighted = weighted)
   #jk_est <- sum(upsilon_hat - jk_reps + (jblk_size * jk_reps) / N_snp)
   jk_est <- rowSums(mapply(jk_reps, jblk_size, FUN = function(jk_rep, size) {
     upsilon_hat - jk_rep + (size * jk_rep) / N_snp
