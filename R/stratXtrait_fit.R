@@ -54,6 +54,8 @@ find_jblks <- function(r, blocks) {
   N_snp <- dim(r)[1]
   targets <- (1:(blocks - 1)) * N_snp/blocks
 
+  if (class(r) != "matrix") r <- as.matrix(r)
+
   subdiag_mean <- diagmean(r, 1, round(nrow(r)/blocks))
   subdiag_min <- which(subdiag_mean <= quantile(subdiag_mean, 0.10))
   cuts <- subdiag_min[sapply(targets, closest, x = subdiag_min)]

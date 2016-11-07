@@ -6,7 +6,7 @@ library(magrittr)
 
 size <- 10000
 jack_args <- list(
-  blocks = 200,
+  blocks = 10,
   bias_correction = FALSE
 )
 
@@ -35,8 +35,6 @@ if (length(script_args) > 0) {
 formstr <- "pass_true_r.output.%s.%s.rds"
 saveRDS(jack, file.path("output", sprintf(formstr, "non_null.jack", filenum)))
 saveRDS(jack_wt, file.path("output", sprintf(formstr, "non_null.jack_wt", filenum)))
-
-size <- 10000
 
 x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
                     Ns = round(0.3 * size))
