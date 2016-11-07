@@ -22,7 +22,7 @@ x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
 set.seed(NULL)
 
 x2 <- do.call(sim1, x1)
-x2$r <- x1$.cov
+x2$r <- as.matrix(x1$.cov)
 jack <- do.call(jackknife, c(x2, x1, jack_args))
 jack_wt <- do.call(jackknife, c(x2, x1, jack_args, weighted = TRUE))
 
@@ -43,7 +43,7 @@ x1$cat_mats[[2]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2) / sum(sapply(x1$cat_mems
 x1$cat_mats[[3]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2) / sum(sapply(x1$cat_mems, length))
 
 x2 <- do.call(sim1, x1)
-x2$r <- x1$.cov
+x2$r <- as.matrix(x1$.cov)
 jack <- do.call(jackknife, c(x2, x1, jack_args))
 jack_wt <- do.call(jackknife, c(x2, x1, weighted = TRUE, jack_args))
 
