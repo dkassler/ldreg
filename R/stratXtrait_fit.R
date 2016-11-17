@@ -31,7 +31,6 @@ getfit <- function(z1, z2, r, cat_mems, N1, N2, N_refpop,
   rhs <- paste(names(dat), collapse = "+")
   dat$zz <- z1 * z2
   wt <- if (weighted) {1 / (var(dat$zz) * colSums(r_squared))} else NULL
-  browser(expr = any(wt <= 0))
   fit <- lm(data = dat, formula(paste0("zz ~ ", rhs)), weights = wt)
   upsilon <- coef(fit)[-1] / sqrt(N1 * N2)
 

@@ -4,7 +4,7 @@ library(methods)
 library(ldreg)
 library(magrittr)
 
-size <- 100
+size <- 10000
 jack_args <- list(
   blocks = 10,
   bias_correction = FALSE
