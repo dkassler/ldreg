@@ -31,6 +31,7 @@ getfit <- function(z1, z2, r, cat_mems, N1, N2, N_refpop,
   rhs <- paste(names(dat), collapse = "+")
   dat$zz <- z1 * z2
   wt <- if (weighted) {1 / (var(dat$zz) * colSums(r_squared))} else NULL
+  browser(expr = any(wt <= 0))
   fit <- lm(data = dat, formula(paste0("zz ~ ", rhs)), weights = wt)
   upsilon <- coef(fit)[-1] / sqrt(N1 * N2)
 
@@ -66,7 +67,7 @@ find_jblks <- function(r, blocks) {
 }
 
 jackknife <- function(z1, z2, r, cat_mems, N1, N2, N_refpop, blocks = 20,
-                      weighted = FALSE, ...) {
+                      weighted = FALSE, bias_correction = TRUE, ...) {
   num_jblks <- blocks
   N_snp <- dim(r)[1]
   #jblk_ind <- cut(1:N_snp, num_jblks, labels = FALSE)
@@ -82,9 +83,10 @@ jackknife <- function(z1, z2, r, cat_mems, N1, N2, N_refpop, blocks = 20,
       sapply(x, function(y) y - sum(unsel < y))
     })
     getfit(z1[sel], z2[sel], r[sel, sel], cat_mems_sel, N1, N2, N_refpop,
-           weighted = weighted)
+           weighted = weighted, bias_correction = bias_correction)
   }))
-  upsilon_hat <- getfit(z1, z2, r, cat_mems, N1, N2, N_refpop, weighted = weighted)
+  upsilon_hat <- getfit(z1, z2, r, cat_mems, N1, N2, N_refpop,
+                        weighted = weighted, bias_correction = bias_correction)
   #jk_est <- sum(upsilon_hat - jk_reps + (jblk_size * jk_reps) / N_snp)
   jk_est <- rowSums(mapply(jk_reps, jblk_size, FUN = function(jk_rep, size) {
     upsilon_hat - jk_rep + (size * jk_rep) / N_snp
