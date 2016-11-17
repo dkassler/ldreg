@@ -57,6 +57,7 @@ find_jblks <- function(r, blocks) {
   if (class(r) != "matrix") r <- as.matrix(r)
 
   subdiag_mean <- diagmean(r, 1, round(nrow(r)/blocks))
+  browser(expr = any(is.na(subdiag_mean)))
   subdiag_min <- which(subdiag_mean <= quantile(subdiag_mean, 0.10))
   cuts <- subdiag_min[sapply(targets, closest, x = subdiag_min)]
   cuts <- unique(cuts)
