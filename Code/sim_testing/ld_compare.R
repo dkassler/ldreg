@@ -16,6 +16,7 @@ ld_true <- colSums(as.matrix(x1$.cov)^2)
 
 ld_out <- list(
   ld_emp = ld_emp,
+  ld_bias = ld_bias,
   ld_true = ld_true
 )
 
