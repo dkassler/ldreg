@@ -1,0 +1,36 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+knitr::opts_knit$set(root.dir = "C:/Users/dkassler/Documents/Research/ldreg")
+getwd()
+library(dplyr)
+```
+
+
+```{r}
+jack <- readRDS("Save/test_null.output.jack.rds")
+
+sprintf("%s elements in list.", length(jack))
+sapply(jack, . %>% class %>% paste(., collapse = " ")) %>% table
+sel.jack <- sapply(jack, . %>% class %>% identical("list"))
+sprintf("Errors found in positions %s.", paste(which(!sel.jack), collapse = ", "))
+```
+
+```{r}
+jack_wt <- readRDS("Save/test_null.output.jack_wt.rds")
+
+
+sprintf("%s elements in list.", length(jack))
+sapply(jack_wt, . %>% class %>% paste(., collapse = " ")) %>% table
+sel.jack_wt <- sapply(jack_wt, . %>% class %>% identical("list"))
+sprintf("Errors found in positions %s.", paste(which(!sel.jack_wt), collapse = ", "))
+```
+
+```{r}
+ld_compare <- readRDS("Save/ld_compare.all.rds")
+getwd()
+```
+

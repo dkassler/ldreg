@@ -8,6 +8,14 @@ library(magrittr)
 
 size <- 10000
 
+if (length(script_args) > 0) {
+  filenum <- script_args[1]
+} else {
+  filenum <- sample.int(1E10, 1)
+}
+formstr <- "output/test_null.output.%s.%s.rds"
+saveRDS(.Random.seed, sprintf(formstr, "seed", filenum))
+
 x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
                     Ns = round(0.3 * size))
 x1$cat_mats[[1]] <- matrix(c(0.7, 0, 0, 0.7), nrow = 2) / sum(sapply(x1$cat_mems, length))
@@ -34,11 +42,5 @@ library(dplyr)
 #
 # print(output)
 
-if (length(script_args) > 0) {
-  filenum <- script_args[1]
-} else {
-  filenum <- sample.int(1E10, 1)
-}
-formstr <- "test_null.output.%s.%s.rds"
-saveRDS(jack, file.path("output", sprintf(formstr, "jack", filenum)))
-saveRDS(jack_wt, file.path("output", sprintf(formstr, "jack_wt", filenum)))
+saveRDS(jack, sprintf(formstr, "jack", filenum))
+saveRDS(jack_wt, sprintf(formstr, "jack_wt", filenum))

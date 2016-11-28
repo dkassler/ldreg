@@ -1,0 +1,14 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup}
+knitr::opts_knit$set(root.dir = "C:/Users/dkassler/Documents/Research/ldreg")
+
+```
+
+```{r}
+getwd()
+```
+

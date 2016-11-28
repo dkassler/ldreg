@@ -21,11 +21,6 @@ x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
                     Ns = round(0.3 * size))
 set.seed(NULL)
 
-x2 <- do.call(sim1, x1)
-x2$r <- as.matrix(x1$.cov)
-jack <- do.call(jackknife, c(x2, x1, jack_args))
-jack_wt <- do.call(jackknife, c(x2, x1, jack_args, weighted = TRUE))
-
 if (length(script_args) > 0) {
   filenum <- script_args[1]
 } else {
@@ -33,6 +28,13 @@ if (length(script_args) > 0) {
 }
 
 formstr <- "pass_true_r.output.%s.%s.rds"
+saveRDS(.Random.seed, sprintf(formstr, "seed", filenum))
+
+x2 <- do.call(sim1, x1)
+x2$r <- as.matrix(x1$.cov)
+jack <- do.call(jackknife, c(x2, x1, jack_args))
+jack_wt <- do.call(jackknife, c(x2, x1, jack_args, weighted = TRUE))
+
 saveRDS(jack, file.path("output", sprintf(formstr, "non_null.jack", filenum)))
 saveRDS(jack_wt, file.path("output", sprintf(formstr, "non_null.jack_wt", filenum)))
 
