@@ -34,6 +34,21 @@ draw_snp_effs <- function(N_snp, cat_mems, cat_mats) {
   }))
 }
 
+#' Simulate data
+#'
+#' @param .cov
+#' @param N1
+#' @param N2
+#' @param Ns
+#' @param N_refpop
+#' @param cat_mems
+#' @param cat_mats
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
 sim1 <- function(.cov, N1, N2, Ns, N_refpop,
                  cat_mems, cat_mats, ...) {
   N_snp <- nrow(.cov)
@@ -59,6 +74,24 @@ sim1 <- function(.cov, N1, N2, Ns, N_refpop,
   return(list(z1 = z1, z2 = z2, r = r))
 }
 
+#' Generate random simulation parameters to pass to sim1
+#'
+#' @param N_snp
+#' @param N1
+#' @param N2
+#' @param Ns
+#' @param N_refpop
+#' @param .cov
+#' @param cat_sizes
+#' @param cat_props
+#' @param cat_mems
+#' @param cat_mats
+#' @param shrink
+#'
+#' @return
+#' @export
+#'
+#' @examples
 rand_sim_data <- function(
   N_snp,
   N1,

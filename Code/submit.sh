@@ -4,8 +4,9 @@ arrayind_upper=100
 sub_or_main='sub'
 auto_name=1
 write_note=0
+clobber=0
 
-while getopts ":o:n:Mi:m:" opt; do
+while getopts ":o:n:Mi:m:c" opt; do
   case $opt in
     o)
       outname=$OPTARG
@@ -23,6 +24,9 @@ while getopts ":o:n:Mi:m:" opt; do
     m)
       NOTE=$OPTARG
       write_note=1
+      ;;
+    c)
+      clobber=1
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2

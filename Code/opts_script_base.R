@@ -12,7 +12,7 @@ for (arg in script_args) {
   } else if (identical(prev_arg, "-i")) {
     jobindex <- arg
   } else if (identical(prev_arg, "-d")) {
-    savedir <- arg
+    outdir <- arg
   }
 
   prev_arg <- arg

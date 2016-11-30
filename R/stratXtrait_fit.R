@@ -65,6 +65,24 @@ find_jblks <- function(r, blocks) {
   sapply(1:N_snp, function(x) sum(x > cuts)) + 1
 }
 
+#' Jackknife estimates
+#'
+#' @param z1
+#' @param z2
+#' @param r
+#' @param cat_mems
+#' @param N1
+#' @param N2
+#' @param N_refpop
+#' @param blocks
+#' @param weighted
+#' @param bias_correction
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
 jackknife <- function(z1, z2, r, cat_mems, N1, N2, N_refpop, blocks = 20,
                       weighted = FALSE, bias_correction = TRUE, ...) {
   num_jblks <- blocks
