@@ -2,3 +2,4 @@
 #' @name ldreg
 #' @import magrittr
 #' @import methods
+NULL

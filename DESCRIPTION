@@ -15,3 +15,4 @@ Imports:
     Matrix,
     pacman,
     sparseMVN
+RoxygenNote: 5.0.1
