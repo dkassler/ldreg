@@ -64,6 +64,22 @@ then
   if [ ! -d "output/$outname" ]; then
     mkdir "output/$outname"
   fi
+  if [ -d "output/$outname/$today" ]; then
+    if [ $clobber == 1 ]
+    then
+      rm -r "output/$outname/$today"
+      outdir="output/$outname/$today"
+      echo "Overwriting $outdir."
+    else
+      tag=0
+      chars=( {a..z} )
+      while [ -d "output/$outname/$today${chars[tag]}" ]; do
+        let tag=tag+1
+      done
+      outdir="output/$outname/$today${chars[tag]}"
+      echo "Previous runs exist. Output will be in $outdir."
+    fi
+  fi
   mkdir $outdir
   mkdir "$outdir/log"
   mkdir "$outdir/out"
