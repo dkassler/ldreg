@@ -5,8 +5,9 @@ sub_or_main='sub'
 auto_name=1
 write_note=0
 clobber=0
+exists_arrayname=0
 
-while getopts ":o:n:Mi:m:c" opt; do
+while getopts ":o:n:Mi:m:cj:" opt; do
   case $opt in
     o)
       outname=$OPTARG
@@ -27,6 +28,10 @@ while getopts ":o:n:Mi:m:c" opt; do
       ;;
     c)
       clobber=1
+      ;;
+    j)
+      arrayname=$OPTARG
+      exists_arrayname=1
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -57,14 +62,17 @@ then
 fi
 
 today=`date +%F`
-outdir="output/$outname/$today"
+if [ $exists_arrayname == 0 ]; then
+  arrayname=$outname
+fi
 
 if [ $sub_or_main == 'sub' ]
 then
   if [ ! -d "output/$outname" ]; then
     mkdir "output/$outname"
   fi
-  if [ -d "output/$outname/$today" ]; then
+  if [ -d "output/$outname/$today" ]
+  then
     if [ $clobber == 1 ]
     then
       rm -r "output/$outname/$today"
@@ -79,6 +87,8 @@ then
       outdir="output/$outname/$today${chars[tag]}"
       echo "Previous runs exist. Output will be in $outdir."
     fi
+  else
+    $outdir="output/$outname/$today"
   fi
   mkdir $outdir
   mkdir "$outdir/log"
@@ -87,7 +97,7 @@ then
   if [ $write_note == 1 ]; then
     echo $NOTE > "$outdir/NOTE.txt"
   fi
-  bsub -q short -W 12:00 -J "$outname[1-$arrayind_upper]" -oo "$outdir/log/%I" \
+  bsub -q short -W 12:00 -J "$arrayname[1-$arrayind_upper]" -oo "$outdir/log/%I" \
   "./submit.sh -i \$LSB_JOBINDEX -M -o $outname $r_script"
 else
   Rscript $r_script -d "$outdir/out" -i $jobindex
