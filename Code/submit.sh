@@ -1,10 +1,10 @@
 #!/bin/bash
 
-arrayind_upper = 100
+arrayind_upper=100
 sub_or_main='sub'
 auto_name=1
 
-while getopts ":o:" opt; do
+while getopts ":o:n:mi:" opt; do
   case $opt in
     o)
       out_name=$OPTARG
@@ -18,6 +18,7 @@ while getopts ":o:" opt; do
       ;;
     i)
       job_index=$OPTARG
+      ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
       exit 1
@@ -51,10 +52,10 @@ outdir="output/$out_name/$today"
 
 if [ $sub_or_main == 'sub' ]
 then
-  if [ ! -d "output/$out_name"]; then
+  if [ ! -d "output/$out_name" ]; then
     mkdir "output/$out_name"
   fi
-  mkdir outdir
+  mkdir $outdir
   mkdir "$outdir/log"
   mkdir "$outdir/out"
   bsub -q short -W 12:00 -J "$out_name[1-$arrayind_upper]" -oo "$outdir/log/%I" \
