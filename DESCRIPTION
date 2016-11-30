@@ -15,3 +15,5 @@ Imports:
     Matrix,
     pacman,
     sparseMVN
+Depends:
+    methods

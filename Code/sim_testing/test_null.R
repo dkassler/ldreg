@@ -19,11 +19,19 @@ for (arg in script_args) {
 }
 rm("prev_arg", "arg")
 
+saveLSF <- function(x, name) {
+  attempt <- try(saveRDS(x, file.path(outdir, sprintf("%s.%s.rds", name, jobindex))))
+  if ("try-error" %in% attempt) {
+    #safe error handling to ensure we don't lose output
+  }
+}
+
 library(ldreg)
 
-size <- 100
+size <- 10000
+jack_args <- list(blocks = 200)
 
-saveRDS(.Random.seed, file.path(outdir, sprintf("seed.%s.rds", jobindex)))
+saveLSF(.Random.seed, "seed")
 
 x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
                     Ns = round(0.3 * size))
@@ -32,8 +40,8 @@ x1$cat_mats[[2]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2) / sum(sapply(x1$cat_mems
 x1$cat_mats[[3]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2) / sum(sapply(x1$cat_mems, length))
 
 x2 <- do.call(sim1, x1)
-jack <- do.call(jackknife, c(x2, x1, blocks = 5))
-jack_wt <- do.call(jackknife, c(x2, x1, weighted = TRUE, blocks = 5))
+jack <- do.call(jackknife, c(x2, x1, jack_args))
+jack_wt <- do.call(jackknife, c(x2, x1, weighted = TRUE, jack_args))
 
-saveRDS(jack, file.path(outdir, sprintf("jack.%s.rds", jobindex)))
-saveRDS(jack_wt, file.path(outdir, sprintf("jack_wt.%s.rds", jobindex)))
+saveLSF(jack, "jack")
+saveLSF(jack_wt, "jack_wt")

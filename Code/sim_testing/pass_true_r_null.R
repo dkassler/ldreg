@@ -28,9 +28,9 @@ saveLSF <- function(x, name) {
 
 library(ldreg)
 
-size <- 100
+size <- 10000
 jack_args <- list(
-  blocks = 5,
+  blocks = 200,
   bias_correction = TRUE
 )
 

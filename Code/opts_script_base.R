@@ -20,7 +20,7 @@ for (arg in script_args) {
 rm("prev_arg", "arg")
 
 saveLSF <- function(x, name) {
-  attempt <- try(saveRDS(x, file.path(outdir, sprintf(name, jobindex))))
+  attempt <- try(saveRDS(x, file.path(outdir, sprintf("%s.%s.rds", name, jobindex))))
   if ("try-error" %in% attempt) {
     #safe error handling to ensure we don't lose output
   }
