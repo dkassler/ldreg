@@ -21,7 +21,7 @@ while getopts ":o:n:Mi:m:" opt; do
       jobindex=$OPTARG
       ;;
     m)
-      NOTE="$OPTARG\n"
+      NOTE=$OPTARG
       write_note=1
       ;;
     \?)
@@ -63,9 +63,9 @@ then
   mkdir $outdir
   mkdir "$outdir/log"
   mkdir "$outdir/out"
-  cat $r_script "$outdir/source.R"
+  cat $r_script > "$outdir/source.R"
   if [ $write_note == 1 ]; then
-    echo $NOTE | cat > "$outdir/NOTE.txt"
+    echo $NOTE > "$outdir/NOTE.txt"
   fi
   bsub -q short -W 12:00 -J "$outname[1-$arrayind_upper]" -oo "$outdir/log/%I" \
   "./submit.sh -i \$LSB_JOBINDEX -M -o $outname $r_script"
