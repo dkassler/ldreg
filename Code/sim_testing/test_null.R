@@ -21,7 +21,7 @@ rm("prev_arg", "arg")
 
 library(ldreg)
 
-size <- 10000
+size <- 100
 
 saveRDS(.Random.seed, file.path(outdir, sprintf("seed.%s.rds", jobindex)))
 
@@ -32,8 +32,8 @@ x1$cat_mats[[2]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2) / sum(sapply(x1$cat_mems
 x1$cat_mats[[3]] <- matrix(c(0.9, 0, 0, 0.6), nrow = 2) / sum(sapply(x1$cat_mems, length))
 
 x2 <- do.call(sim1, x1)
-jack <- do.call(jackknife, c(x2, x1, blocks = 200))
-jack_wt <- do.call(jackknife, c(x2, x1, weighted = TRUE, blocks = 200))
+jack <- do.call(jackknife, c(x2, x1, blocks = 5))
+jack_wt <- do.call(jackknife, c(x2, x1, weighted = TRUE, blocks = 5))
 
 saveRDS(jack, file.path(outdir, sprintf("jack.%s.rds", jobindex)))
 saveRDS(jack_wt, file.path(outdir, sprintf("jack_wt.%s.rds", jobindex)))
