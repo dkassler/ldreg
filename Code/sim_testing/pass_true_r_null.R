@@ -26,13 +26,15 @@ saveLSF <- function(x, name) {
   }
 }
 
+library(ldreg)
+
 size <- 10000
 jack_args <- list(
   blocks = 200,
   bias_correction = TRUE
 )
 
-saveLSF(.Random.seed, "seed.%s.rds")
+saveLSF(.Random.seed, "seed")
 
 x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
                     Ns = round(0.3 * size))
