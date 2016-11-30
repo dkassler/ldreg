@@ -3,8 +3,9 @@
 arrayind_upper=100
 sub_or_main='sub'
 auto_name=1
+write_note=0
 
-while getopts ":o:n:mi:" opt; do
+while getopts ":o:n:Mi:m:" opt; do
   case $opt in
     o)
       outname=$OPTARG
@@ -13,11 +14,15 @@ while getopts ":o:n:mi:" opt; do
     n)
       arrayind_upper=$OPTARG
       ;;
-    m)
+    M)
       sub_or_main='main'
       ;;
     i)
       jobindex=$OPTARG
+      ;;
+    m)
+      NOTE="$OPTARG\n"
+      write_note=1
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -58,8 +63,12 @@ then
   mkdir $outdir
   mkdir "$outdir/log"
   mkdir "$outdir/out"
+  cat $r_script "$outdir/source.R"
+  if [ $write_note == 1 ]; then
+    echo $NOTE | cat > "$outdir/NOTE.txt"
+  fi
   bsub -q short -W 12:00 -J "$outname[1-$arrayind_upper]" -oo "$outdir/log/%I" \
-  "./submit.sh -i \$LSB_JOBINDEX -m -o $outname $r_script"
+  "./submit.sh -i \$LSB_JOBINDEX -M -o $outname $r_script"
 else
   Rscript $r_script -d "$outdir/out" -i $jobindex
 fi
