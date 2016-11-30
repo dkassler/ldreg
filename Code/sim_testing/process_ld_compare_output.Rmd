@@ -9,6 +9,42 @@ knitr::opts_knit$set(root.dir = "C:/Users/dkassler/Documents/Research/ldreg")
 ```
 
 ```{r}
-getwd()
+ld_compare <- readRDS("Save/ld_compare.all.rds")
+
+library(dplyr)
+library(ggplot2)
 ```
 
+```{r}
+ld_compare %>% 
+  lapply(as.data.frame) %>% 
+  bind_rows(.id = "trial") %>%
+  tidyr::extract(trial, "trial", "\\w+\\.(\\d+)\\.\\w+", convert = TRUE) %>% 
+  filter(trial <= 1) %>% 
+  {
+    ggplot(data = ., aes(x = ld_true, y = ld_bias)) +
+      geom_point(alpha = 0.05, position = position_jitter(height = 0, width = 0.4)) +
+      geom_abline(color = "red") +
+      theme_bw() +
+      labs(x = "True LD Scores", y = "Bias Corrected Empirical LD Scores",
+           title = "LD Score Comparison for 1 Run")
+  }
+
+```
+
+```{r}
+ld_compare %>% 
+  lapply(as.data.frame) %>% 
+  bind_rows(.id = "trial") %>%
+  tidyr::extract(trial, "trial", "\\w+\\.(\\d+)\\.\\w+", convert = TRUE) %>% 
+  filter(trial <= 100) %>% 
+  {
+    ggplot(data = ., aes(x = ld_true, y = ld_bias)) +
+      geom_point(alpha = 0.01, position = position_jitter(height = 0, width = 0.4)) +
+      geom_abline(color = "red") +
+      theme_bw() +
+      labs(x = "True LD Scores", y = "Bias Corrected Empirical LD Scores",
+           title = "LD Score Comparison for 100 Runs")
+  }
+
+```

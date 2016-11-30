@@ -1,0 +1,139 @@
+---
+title: "Bug Swatting"
+date: "November 17, 2016"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_knit$set(root.dir = "C:/Users/dkassler/Documents/Research/ldreg")
+
+```
+
+```{r, echo = FALSE}
+library(dplyr)
+
+cat_mats <- list(
+  non_null = list(c(-2.84507392318969e-05, 2.89806547772252e-05, 5.53275106305426e-05
+), c(-3.35384263223196e-05, 3.25006500704948e-05, 4.9619831610471e-05
+), c(4.43856550207098e-05, 4.47664068532035e-05, 5.18998517090398e-05
+)),
+null = list(c(0, 4.24242424242424e-05, 4.24242424242424e-05), c(0, 5.45454545454545e-05,
+3.63636363636364e-05), c(0, 5.45454545454545e-05, 3.63636363636364e-05
+))
+)
+true_upsilon <- c(-2.84507392318969e-05, -3.35384263223196e-05, 4.43856550207098e-05)
+
+cat("True Upsilons:\n")
+print(true_upsilon)
+
+jack_zero_covg <- function(jack) {
+  jack %>%
+    sapply(function(x) {
+      (0 < x$estim + 2 * x$se) & (0 > x$estim - 2 * x$se)
+    }) %>%
+    rowMeans()
+}
+
+check_std_errors <- function(jack) {
+  rbind(
+    avg_jack_se = jack %>%
+      sapply(`[[`, "se") %>%
+      apply(1, mean),
+    empirical_sd = jack %>%
+      sapply(`[[`, "estim") %>%
+      apply(1, sd)
+  )
+}
+
+check_bias <- function(jack) {
+
+}
+
+#path <- "Save/pass_true_r.output.null.jack_wt.all.rds"
+#formstr <- "Save/pass_true_r.output.%s.%s.all.rds"
+formstr <- "Save/test_%s.output.%s.all.rds"
+
+for (j in c("jack", "jack_wt")) for (i in c("null", "non_null")) {
+  cat('\n')
+  message(sprintf("Aggregating %s and %s", i, j))
+
+  jack <- readRDS(sprintf(formstr, i, j))
+  sel <- sapply(jack, . %>% class %>% identical("list"))
+  message(sprintf("Removed %d runs with errors", sum(!sel)))
+  jack <- jack[sel]
+
+  cat("Averages:\n")
+  rbind(
+    jackknife_estim = jack %>% sapply(`[[`, "estim") %>% rowMeans(),
+    jackknife_se = jack %>% sapply(`[[`, "se") %>% rowMeans(),
+    estimate = jack %>% sapply(`[[`, "upsilon_hat") %>% rowMeans()
+  ) %>% print()
+
+  agg <- jack_zero_covg(jack)
+  cat("\nPercent overlap zero:\n")
+  print(agg)
+
+  cat("\nCompare jackknife se to empirical sd:\n")
+  print(check_std_errors(jack))
+
+  cat("\nCheck for bias:\n")
+  if (i == "null") {
+    jack %>%
+      sapply(`[[`, "estim") %>%
+      rowMeans() %>%
+      print()
+  } else {
+    jack %>%
+      sapply(function(x) x$estim - true_upsilon) %>%
+      rowMeans() %>%
+      print()
+  }
+}
+
+```
+
+###Passing true R matrix instead:
+
+```{r, echo = FALSE}
+formstr <- "Save/pass_true_r.output.%s.%s.all.rds"
+
+for (j in c("jack", "jack_wt")) for (i in c("null", "non_null")) {
+  cat('\n')
+  message(sprintf("Aggregating %s and %s", i, j))
+
+  jack <- readRDS(sprintf(formstr, i, j))
+  sel <- sapply(jack, . %>% class %>% identical("list"))
+  message(sprintf("Removed %d runs with errors", sum(!sel)))
+  jack <- jack[sel]
+
+  cat("Averages:\n")
+  rbind(
+    jackknife_estim = jack %>% sapply(`[[`, "estim") %>% rowMeans(),
+    jackknife_se = jack %>% sapply(`[[`, "se") %>% rowMeans(),
+    estimate = jack %>% sapply(`[[`, "upsilon_hat") %>% rowMeans()
+  ) %>% print()
+
+  agg <- jack_zero_covg(jack)
+  cat("\nPercent overlap zero:\n")
+  print(agg)
+
+  cat("\nCompare jackknife se to empirical sd:\n")
+  print(check_std_errors(jack))
+
+  cat("\nCheck for bias:\n")
+  if (i == "null") {
+    jack %>%
+      sapply(`[[`, "estim") %>%
+      rowMeans() %>%
+      print()
+  } else {
+    jack %>%
+      sapply(function(x) x$estim - true_upsilon) %>%
+      rowMeans() %>%
+      print()
+  }
+}
+
+
+```
+

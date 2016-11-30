@@ -1,0 +1,25 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup}
+knitr::opts_knit$set(root.dir = "C:/Users/dkassler/Documents/Research/ldreg")
+
+```
+
+```{r}
+jack <- readRDS("Save/test_null.noseed.output.jack.rds")
+jack_wt <- readRDS("Save/test_null.noseed.output.jack_wt.rds")
+```
+
+```{r}
+df_null <- list(
+  F = jack,
+  T = jack_wt
+) %>% 
+  lapply(function(x) lapply(x, function(y) bind_cols(y, .id = "source"))) %>% 
+  lapply(bind_rows(.id = "trial")) %>% 
+  bind_rows(.id = "wt")
+```
+
