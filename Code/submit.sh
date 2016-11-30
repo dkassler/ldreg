@@ -7,7 +7,7 @@ auto_name=1
 while getopts ":o:n:mi:" opt; do
   case $opt in
     o)
-      out_name=$OPTARG
+      outname=$OPTARG
       auto_name=0
       ;;
     n)
@@ -17,7 +17,7 @@ while getopts ":o:n:mi:" opt; do
       sub_or_main='main'
       ;;
     i)
-      job_index=$OPTARG
+      jobindex=$OPTARG
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -39,7 +39,7 @@ then
   regex="^(.*)\.R$"
   if [[ $r_script =~ $regex ]]
   then
-    out_name=${BASH_REMATCH[1]}
+    outname=${BASH_REMATCH[1]}
     echo "Naming job automatically."
   else
     echo "Could not find name for submitted job!"
@@ -48,19 +48,19 @@ then
 fi
 
 today=`date +%F`
-outdir="output/$out_name/$today"
+outdir="output/$outname/$today"
 
 if [ $sub_or_main == 'sub' ]
 then
-  if [ ! -d "output/$out_name" ]; then
-    mkdir "output/$out_name"
+  if [ ! -d "output/$outname" ]; then
+    mkdir "output/$outname"
   fi
   mkdir $outdir
   mkdir "$outdir/log"
   mkdir "$outdir/out"
-  bsub -q short -W 12:00 -J "$out_name[1-$arrayind_upper]" -oo "$outdir/log/%I" \
-  "./submit.sh -i \$LSB_JOBINDEX -m -o $out_name $r_script"
+  bsub -q short -W 12:00 -J "$outname[1-$arrayind_upper]" -oo "$outdir/log/%I" \
+  "./submit.sh -i \$LSB_JOBINDEX -m -o $outname $r_script"
 else
-  Rscript $r_script -d "$outdir/out" -i $job_index
+  Rscript $r_script -d "$outdir/out" -i $jobindex
 fi
 

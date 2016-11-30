@@ -2,17 +2,17 @@
 script_args <- commandArgs(T)
 
 # Set defaults
-job_index <- sample.int(1E10, 1)
+jobindex <- sample.int(1E10, 1)
 
 # Loop through arguments checking for flags
 prev_arg <- NULL
 for (arg in script_args) {
   if (identical(prev_arg, "-o")) {
-    out_name <- arg
+    outname <- arg
   } else if (identical(prev_arg, "-i")) {
-    job_index <- arg
+    jobindex <- arg
   } else if (identical(prev_arg, "-d")) {
-    save_dir <- arg
+    savedir <- arg
   }
 
   prev_arg <- arg
