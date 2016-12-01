@@ -30,5 +30,7 @@ saveLSF <- function(x, name) {
   attempt <- try(saveRDS(x, path))
   if ("try-error" %in% attempt) {
     #safe error handling to ensure we don't lose output
+    print(path)
+    print(opts)
   }
 }

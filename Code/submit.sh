@@ -92,7 +92,7 @@ then
       echo "Previous runs exist. Output will be in $outdir."
     fi
   else
-    $outdir="output/$outname/$today"
+    outdir="output/$outname/$today"
   fi
   mkdir $outdir
   mkdir "$outdir/log"
