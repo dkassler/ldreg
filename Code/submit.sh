@@ -8,7 +8,7 @@ clobber=0
 exists_arrayname=0
 memlimit=''
 
-while getopts ":o:n:Ai:m:cj:M:" opt; do
+while getopts ":o:n:Ai:m:cj:M:d:" opt; do
   case $opt in
     o)
       outname=$OPTARG
@@ -36,6 +36,9 @@ while getopts ":o:n:Ai:m:cj:M:" opt; do
       ;;
     M)
       memlimit="-M $OPTARG"
+      ;;
+    d)
+      outdir=$OPTARG
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -102,7 +105,7 @@ then
     echo $NOTE > "$outdir/NOTE.txt"
   fi
   bsub -q short -W 12:00 -J "$arrayname[1-$arrayind_upper]" $memlimit -oo "$outdir/log/%I" \
-  "./submit.sh -i \$LSB_JOBINDEX -A -o $outname $r_script"
+  "./submit.sh -i \$LSB_JOBINDEX -A -o $outname -d $outdir $r_script"
 else
   Rscript $r_script -d "$outdir/out" -i $jobindex
 fi
