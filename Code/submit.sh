@@ -7,6 +7,7 @@ write_note=0
 clobber=0
 exists_arrayname=0
 memlimit=''
+memflag=''
 
 while getopts ":o:N:Ai:m:cj:M:d:" opt; do
   case $opt in
@@ -35,7 +36,8 @@ while getopts ":o:N:Ai:m:cj:M:d:" opt; do
       exists_arrayname=1
       ;;
     M)
-      memlimit="-M $OPTARG"
+      memlimit="rusage[mem=$OPTARG]"
+      memflag=-R
       ;;
     d)
       outdir=$OPTARG
@@ -101,10 +103,11 @@ then
   mkdir "$outdir/log"
   mkdir "$outdir/out"
   cat $r_script > "$outdir/source.R"
+  #Rscript -e 'devtools::session_info()' > "$outdir/session_info.txt"
   if [ $write_note == 1 ]; then
     echo $NOTE > "$outdir/NOTE.txt"
   fi
-  bsub -q short -W 12:00 -J "$arrayname[1-$arrayind_upper]" $memlimit -oo "$outdir/log/%I" \
+  bsub -q short -W 12:00 -J "$arrayname[1-$arrayind_upper]" $memflag $memlimit -oo "$outdir/log/%I" \
   "./submit.sh -i \$LSB_JOBINDEX -A -o $outname -d $outdir $r_script"
 else
   Rscript $r_script -d "$outdir/out" -i $jobindex
