@@ -8,13 +8,13 @@ clobber=0
 exists_arrayname=0
 memlimit=''
 
-while getopts ":o:n:Ai:m:cj:M:d:" opt; do
+while getopts ":o:N:Ai:m:cj:M:d:" opt; do
   case $opt in
     o)
       outname=$OPTARG
       auto_name=0
       ;;
-    n)
+    N)
       arrayind_upper=$OPTARG
       ;;
     A)
