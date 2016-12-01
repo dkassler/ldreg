@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(root.dir = "~/Research/ldreg")
-knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(echo = F, warning = F)
 ```
 
 ```{r}
@@ -68,15 +68,15 @@ true_upsilon <- c(-2.84507392318969e-05, -3.35384263223196e-05, 4.43856550207098
 
 ```
 
-```{r, eval = FALSE}
-.tmp <- foreach(wt = c("jack", "jack_wt"), .combine = bind_rows) %:%
+```{r, eval = T}
+.tmp <- foreach(wt = c("nowt", "wt"), .combine = bind_rows) %:%
   foreach(i = 1:100, .combine = bind_rows, .errorhandling = "remove") %do% {
-    jack <- readRDS(sprintf("Output/test_non_null/2016-11-30/out/%s.%s.rds", wt, i))
+    jack <- readRDS(sprintf("Output/pass_true_r_non_null/2016-11-30b/out/jack.%s.emp.%s.rds", wt, i))
     jack %>% 
       as.data.frame() %>% 
       tibble::rownames_to_column(var = "group") %>% 
       tidyr::gather("var", "value", -group) %>% 
-      mutate(index = i, wt = (wt == "jack_wt"))
+      mutate(index = i, wt = (wt == "wt"))
   } %>% 
   mutate(group = tidyr::extract_numeric(group),
          true_val = true_upsilon[group])
@@ -103,7 +103,7 @@ true_upsilon <- c(-2.84507392318969e-05, -3.35384263223196e-05, 4.43856550207098
 
 In the plot below, the vertical lines indicate the true (non-null) values of $\upsilon$ for each group.
 
-```{r, eval = FALSE}
+```{r, eval = T}
 ggplot(data = .tmp %>% 
          tidyr::spread(var, value)) +
   geom_density(aes(x = upsilon_hat, color = factor(group), linetype = wt)) +
@@ -119,16 +119,16 @@ Are the issues we see the result of a poorly estimated $r$ matrix? To check this
 
 ##Null Case
 
-```{r, eval = FALSE}
+```{r, eval = T}
 .tmp <- foreach(r = c("emp", "true"), .combine = bind_rows) %:%
   foreach(wt = c("nowt", "wt"), .combine = bind_rows) %:%
   foreach(i = 1:100, .combine = bind_rows, .errorhandling = "remove") %do% {
-    jack <- readRDS(sprintf("Output/pass_true_r_null/2016-11-30/out/jack.%s.%s.%s.rds", wt, r, i))
+    jack <- readRDS(sprintf("Output/pass_true_r_null/2016-11-30d/out/jack.%s.%s.%s.rds", wt, r, i))
     jack %>% 
       as.data.frame() %>% 
       tibble::rownames_to_column(var = "group") %>% 
       tidyr::gather("var", "value", -group) %>% 
-      mutate(index = i, wt = (wt == "jack_wt"), r = r)
+      mutate(index = i, wt = (wt == "wt"), r = r)
   }
 .tmp %>% 
   tidyr::spread(var, value) %>% 
@@ -154,16 +154,16 @@ Are the issues we see the result of a poorly estimated $r$ matrix? To check this
 ```
 
 
-```{r, eval = FALSE}
+```{r, eval = T}
 .tmp <- foreach(r = c("emp", "true"), .combine = bind_rows) %:%
   foreach(wt = c("nowt", "wt"), .combine = bind_rows) %:%
   foreach(i = 1:100, .combine = bind_rows, .errorhandling = "remove") %do% {
-    jack <- readRDS(sprintf("Output/pass_true_r_non_null/2016-11-30/out/jack.%s.%s.%s.rds", wt, r, i))
+    jack <- readRDS(sprintf("Output/pass_true_r_non_null/2016-11-30b/out/jack.%s.%s.%s.rds", wt, r, i))
     jack %>% 
       as.data.frame() %>% 
       tibble::rownames_to_column(var = "group") %>% 
       tidyr::gather("var", "value", -group) %>% 
-      mutate(index = i, wt = (wt == "jack_wt"), r = r)
+      mutate(index = i, wt = (wt == "wt"), r = r)
   } %>% 
   mutate(group = tidyr::extract_numeric(group),
          true_val = true_upsilon[group])
@@ -172,7 +172,7 @@ Are the issues we see the result of a poorly estimated $r$ matrix? To check this
   mutate(cover_zero = (estim - 2*se < 0) & (estim + 2*se > 0),
          cover_true = (estim - 2*se < true_val) & (estim + 2*se > true_val),
          group = tidyr::extract_numeric(group)) %>% 
-  group_by(wt, group) %>% 
+  group_by(wt, r, group) %>% 
   summarize(
     "CI Cov 0" = scales::percent(mean(cover_zero)),
     "CI Cov True" = scales::percent(mean(cover_true)),
