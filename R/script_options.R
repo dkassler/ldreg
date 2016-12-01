@@ -3,7 +3,7 @@ getopts <- function() {
   script_args <- commandArgs(T)
 
   # Set defaults
-  jobindex <- sample.int(1E10, 1)
+  # jobindex <- sample.int(1E10, 1)
 
   # Loop through arguments checking for flags
   opts <- list()
