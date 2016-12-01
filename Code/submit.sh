@@ -6,8 +6,9 @@ auto_name=1
 write_note=0
 clobber=0
 exists_arrayname=0
+memlimit=''
 
-while getopts ":o:n:Mi:m:cj:" opt; do
+while getopts ":o:n:Ai:m:cj:M:" opt; do
   case $opt in
     o)
       outname=$OPTARG
@@ -16,7 +17,7 @@ while getopts ":o:n:Mi:m:cj:" opt; do
     n)
       arrayind_upper=$OPTARG
       ;;
-    M)
+    A)
       sub_or_main='main'
       ;;
     i)
@@ -32,6 +33,9 @@ while getopts ":o:n:Mi:m:cj:" opt; do
     j)
       arrayname=$OPTARG
       exists_arrayname=1
+      ;;
+    M)
+      memlimit="-M $OPTARG"
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -97,8 +101,8 @@ then
   if [ $write_note == 1 ]; then
     echo $NOTE > "$outdir/NOTE.txt"
   fi
-  bsub -q short -W 12:00 -J "$arrayname[1-$arrayind_upper]" -oo "$outdir/log/%I" \
-  "./submit.sh -i \$LSB_JOBINDEX -M -o $outname $r_script"
+  bsub -q short -W 12:00 -J "$arrayname[1-$arrayind_upper]" $memlimit -oo "$outdir/log/%I" \
+  "./submit.sh -i \$LSB_JOBINDEX -A -o $outname $r_script"
 else
   Rscript $r_script -d "$outdir/out" -i $jobindex
 fi
