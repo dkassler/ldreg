@@ -1,0 +1,89 @@
+---
+title: "Test analysis"
+author: "Daniel Kassler"
+date: "November 30, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "~/Research/ldreg")
+knitr::opts_chunk$set(echo = F)
+```
+
+```{r}
+library(ggplot2)
+```
+
+
+Unless otherwise specified, $M = N1 = N2 = N_{ref} = 10,000$ and $N_{shared} = 3,000$. SNPs are randomly assigned into groups $2$ and $3$, comprising $25\%$ and $40\%$ of the total number of SNPs respectively; group $1$ consists of all SNPs.
+
+#Null Test
+
+```{r, warning = F, include = F}
+library(foreach)
+library(dplyr)
+
+jack <- foreach(wt = c("jack", "jack_wt"), .combine = bind_rows) %:%
+  foreach(i = 1:100, .combine = bind_rows, .errorhandling = "remove") %do% {
+    jack <- readRDS(sprintf("Output/test_null/2016-11-30/out/%s.%s.rds", wt, i))
+    jack %>% 
+      as.data.frame() %>% 
+      tibble::rownames_to_column(var = "group") %>% 
+      tidyr::gather("var", "value", -group) %>% 
+      mutate(index = i, wt = (wt == "jack_wt"))
+  }
+```
+
+```{r, results = 'asis'}
+jack %>% 
+  tidyr::spread(var, value) %>% 
+  mutate(cover_zero = (estim - 2*se < 0) & (estim + 2*se > 0),
+         group = tidyr::extract_numeric(group)) %>% 
+  group_by(wt, group) %>% 
+  summarize(
+    "CI Cov 0" = scales::percent(mean(cover_zero)),
+    "Avg J.Est" = mean(estim),
+    "Avg Est" = mean(upsilon_hat),
+    "Avg J.SE" = mean(se),
+    "SD J.Est" = sd(estim),
+    "SD Est" = sd(upsilon_hat)
+  ) %>% 
+  {knitr::kable(.)}
+  #{print(xtable::xtable(., ""), type = "html")}
+```
+
+#LD Score Comparison
+
+Here we aggregate the true LD scores and bias corrected empirical LD scores for 100 random simulations of the sort used in the other simulation analyses here, and compare them to see if there is systematic misestimation.
+
+```{r}
+ld_compare <- readRDS("Save/ld_compare.all.rds")
+ld_compare %>% 
+  lapply(as.data.frame) %>% 
+  bind_rows(.id = "trial") %>%
+  tidyr::extract(trial, "trial", "\\w+\\.(\\d+)\\.\\w+", convert = TRUE) %>% 
+  filter(trial <= 1) %>% 
+  {
+    ggplot(data = ., aes(x = ld_true, y = ld_bias)) +
+      geom_point(alpha = 0.05, position = position_jitter(height = 0, width = 0.4)) +
+      geom_abline(color = "red") +
+      theme_bw() +
+      labs(x = "True LD Scores", y = "Bias Corrected Empirical LD Scores",
+           title = "LD Score Comparison for 1 Run")
+  }
+
+ld_compare %>% 
+  lapply(as.data.frame) %>% 
+  bind_rows(.id = "trial") %>%
+  tidyr::extract(trial, "trial", "\\w+\\.(\\d+)\\.\\w+", convert = TRUE) %>% 
+  filter(trial <= 100) %>% 
+  {
+    ggplot(data = ., aes(x = ld_true, y = ld_bias)) +
+      geom_point(alpha = 0.01, position = position_jitter(height = 0, width = 0.4)) +
+      geom_abline(color = "red") +
+      theme_bw() +
+      labs(x = "True LD Scores", y = "Bias Corrected Empirical LD Scores",
+           title = "LD Score Comparison for 100 Runs")
+  }
+```
+

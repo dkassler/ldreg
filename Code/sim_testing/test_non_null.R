@@ -1,5 +1,8 @@
 library(ldreg)
 
+size <- 10000
+jack_args <- list(blocks = 200)
+
 x1_seed <- if (size == 100) {
   938 #/1000
 } else if (size == 10000) {
