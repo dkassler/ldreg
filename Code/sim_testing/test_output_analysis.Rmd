@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(root.dir = "~/Research/ldreg")
-knitr::opts_chunk$set(echo = F, warning = F)
+knitr::opts_chunk$set(echo = F)
 ```
 
 ```{r}
@@ -19,7 +19,7 @@ Unless otherwise specified, $M = N1 = N2 = N_{ref} = 10,000$ and $N_{shared} = 3
 
 #Null Test
 
-```{r, warning = F, include = F}
+```{r, include = F}
 library(foreach)
 library(dplyr)
 
@@ -38,7 +38,7 @@ jack <- foreach(wt = c("jack", "jack_wt"), .combine = bind_rows) %:%
 jack %>% 
   tidyr::spread(var, value) %>% 
   mutate(cover_zero = (estim - 2*se < 0) & (estim + 2*se > 0),
-         group = tidyr::extract_numeric(group)) %>% 
+         group = readr::parse_number(group)) %>% 
   group_by(wt, group) %>% 
   summarize(
     "CI Cov 0" = scales::percent(mean(cover_zero)),
@@ -78,13 +78,13 @@ true_upsilon <- c(-2.84507392318969e-05, -3.35384263223196e-05, 4.43856550207098
       tidyr::gather("var", "value", -group) %>% 
       mutate(index = i, wt = (wt == "wt"))
   } %>% 
-  mutate(group = tidyr::extract_numeric(group),
+  mutate(group = readr::parse_number(group),
          true_val = true_upsilon[group])
 .tmp %>%
   tidyr::spread(var, value) %>% 
   mutate(cover_zero = (estim - 2*se < 0) & (estim + 2*se > 0),
          cover_true = (estim - 2*se < true_val) & (estim + 2*se > true_val),
-         group = tidyr::extract_numeric(group)) %>% 
+         group = readr::parse_number(group)) %>% 
   group_by(wt, group) %>% 
   summarize(
     "CI Cov 0" = scales::percent(mean(cover_zero)),
@@ -133,7 +133,7 @@ Are the issues we see the result of a poorly estimated $r$ matrix? To check this
 .tmp %>% 
   tidyr::spread(var, value) %>% 
   mutate(cover_zero = (estim - 2*se < 0) & (estim + 2*se > 0),
-         group = tidyr::extract_numeric(group)) %>% 
+         group = readr::parse_number(group)) %>% 
   group_by(wt, group, r) %>% 
   summarize(
     "CI Cov 0" = scales::percent(mean(cover_zero)),
@@ -165,13 +165,13 @@ Are the issues we see the result of a poorly estimated $r$ matrix? To check this
       tidyr::gather("var", "value", -group) %>% 
       mutate(index = i, wt = (wt == "wt"), r = r)
   } %>% 
-  mutate(group = tidyr::extract_numeric(group),
+  mutate(group = readr::parse_number(group),
          true_val = true_upsilon[group])
 .tmp %>%
   tidyr::spread(var, value) %>% 
   mutate(cover_zero = (estim - 2*se < 0) & (estim + 2*se > 0),
          cover_true = (estim - 2*se < true_val) & (estim + 2*se > true_val),
-         group = tidyr::extract_numeric(group)) %>% 
+         group = readr::parse_number(group)) %>% 
   group_by(wt, r, group) %>% 
   summarize(
     "CI Cov 0" = scales::percent(mean(cover_zero)),
@@ -191,8 +191,8 @@ Are the issues we see the result of a poorly estimated $r$ matrix? To check this
 
 Here we aggregate the true LD scores and bias corrected empirical LD scores for 100 random simulations of the sort used in the other simulation analyses here, and compare them to see if there is systematic mis-estimation.
 
-```{r}
-ld_compare <- readRDS("Save/ld_compare.all.rds")
+```{r, eval=F}
+ld_compare <- readRDS("Output/old/ld_compare.all.rds")
 ld_compare %>% 
   lapply(as.data.frame) %>% 
   bind_rows(.id = "trial") %>%

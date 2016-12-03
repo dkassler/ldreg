@@ -6,7 +6,8 @@ jack_args <- list(
   bias_correction = TRUE
 )
 
-saveLSF(.Random.seed, "seed")
+invisible(runif(1))
+saveLSF_rng()
 
 x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
                     Ns = round(0.3 * size))

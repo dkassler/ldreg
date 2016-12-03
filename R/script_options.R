@@ -23,13 +23,3 @@ getopts <- function() {
   #return list of arguments
   opts
 }
-
-saveLSF <- function(x, name) {
-  opts <- getopts()
-  path <- file.path(opts$outdir, sprintf("%s.%s.rds", name, opts$jobindex))
-  attempt <- try(saveRDS(x, path))
-  if ("try-error" %in% attempt) {
-    #safe error handling to ensure we don't lose output
-    stop("Unable to save.")
-  }
-}

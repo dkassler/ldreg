@@ -16,7 +16,7 @@ x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
                     Ns = round(0.3 * size))
 set.seed(NULL)
 
-saveLSF(.Random.seed, "seed")
+saveLSF_rng()
 
 # x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
 #                     Ns = round(0.3 * size))
