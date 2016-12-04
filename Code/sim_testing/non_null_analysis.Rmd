@@ -1,0 +1,37 @@
+---
+title: "Test Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(foreach)
+library(dplyr)
+library(ggplot2)
+```
+
+# Old Non-Null Results
+
+Checking the old save files, we can see that it __was__ estimating values relatively well.
+
+```{r}
+jack <- readRDS("output/old/test_non_null.output.jack_wt.all.rds")
+foreach(i = 1:100, .combine = bind_rows) %do% 
+{
+  jack[[i]] %>% 
+    as.data.frame() %>% 
+    tibble::rownames_to_column(var = "group") %>% 
+    mutate(index = i)
+} %>% 
+{
+  ggplot(data = ., aes(x = upsilon_hat, color = group)) +
+    geom_density() +
+    theme_bw()
+}
+
+```
+
+But now it isn't. What happened?

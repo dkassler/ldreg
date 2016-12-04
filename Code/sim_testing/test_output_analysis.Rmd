@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = F)
 
 ```{r}
 library(ggplot2)
+library(magrittr)
 ```
 
 
@@ -64,14 +65,16 @@ ggplot(data = jack %>%
 #Non-Null Test
 
 ```{r}
-true_upsilon <- c(-2.84507392318969e-05, -3.35384263223196e-05, 4.43856550207098e-05)
-
+#true_upsilon <- c(-2.84507392318969e-05, -3.35384263223196e-05, 4.43856550207098e-05)
+set.seed(180)
+x1 <- ldreg::rand_sim_data(N_snp = 10000, N1 = 10000, Ns = 3000, N_ref = 10000)
+true_upsilon <- sapply(x1$cat_mats, `[`, 1, 2)
 ```
 
 ```{r, eval = T}
-.tmp <- foreach(wt = c("nowt", "wt"), .combine = bind_rows) %:%
+.tmp <- foreach(wt = c("", "_wt"), .combine = bind_rows) %:%
   foreach(i = 1:100, .combine = bind_rows, .errorhandling = "remove") %do% {
-    jack <- readRDS(sprintf("Output/pass_true_r_non_null/2016-11-30b/out/jack.%s.emp.%s.rds", wt, i))
+    jack <- readRDS(sprintf("Output/test_non_null/2016-12-03/out/jack%s.%s.rds", wt, i))
     jack %>% 
       as.data.frame() %>% 
       tibble::rownames_to_column(var = "group") %>% 
