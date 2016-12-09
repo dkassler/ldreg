@@ -20,10 +20,11 @@ getfit <- function(z1, z2, r, cat_mems, N1, N2, weighted = FALSE, ...) {
   fit <- lm(data = dat, formula(paste0("zz ~ ", rhs)), weights = wt)
   upsilon <- coef(fit)[-1] / sqrt(N1 * N2)
 
-  tau1 <- getfit_strat(z1^2, r, cat_mems, N1)
-  tau2 <- getfit_strat(z2^2, r, cat_mems, N2)
-
-  upsilon / sqrt(abs(tau1 * tau2))
+  # tau1 <- getfit_strat(z1^2, r, cat_mems, N1)
+  # tau2 <- getfit_strat(z2^2, r, cat_mems, N2)
+  #
+  # upsilon / sqrt(abs(tau1 * tau2))
+  upsilon
 }
 
 getfit.list <- function(x) {
