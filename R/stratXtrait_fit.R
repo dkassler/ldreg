@@ -37,7 +37,7 @@ getfit.list <- function(x) {
   getfit(x$z1, x$z2, x$r, x$cat_mems)
 }
 
-jackknife <- function(z1, z2, r, cat_mems, N1, N2, blocks = 20,
+jackknife <- function(z1, z2, r, cat_mems, N1, N2, N_refpop, blocks = 20,
                       weighted = FALSE, bias_correction = TRUE, ...) {
   num_jblks <- blocks
   N_snp <- dim(r)[1]
