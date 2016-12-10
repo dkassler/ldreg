@@ -29,6 +29,12 @@ saveLSF(jack_wt_emp, "jack.wt.emp")
 
 jack_args$bias_correction <- FALSE
 
+jack_nobc <- do.call(jackknife, c(x2, x1, jack_args))
+jack_wt_nobc <- do.call(jackknife, c(x2, x1, jack_args, weighted = TRUE))
+
+saveLSF(jack_nobc, "jack.nowt.nobc")
+saveLSF(jack_wt_nobc, "jack.wt.nobc")
+
 x2$r <- as.matrix(x1$.cov)
 jack_true <- do.call(jackknife, c(x2, x1, jack_args))
 jack_wt_true <- do.call(jackknife, c(x2, x1, jack_args, weighted = TRUE))
