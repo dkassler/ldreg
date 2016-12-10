@@ -10,13 +10,19 @@ getfit_strat <- function(chi2, r, cat_mems, N, ...) {
   tau
 }
 
-getfit <- function(z1, z2, r, cat_mems, N1, N2, weighted = FALSE, ...) {
-  ld <- lapply(cat_mems, function(.) colSums((r^2)[.,]))
+getfit <- function(z1, z2, r, cat_mems, N1, N2, N_refpop,
+                   weighted = FALSE, bias_correction = TRUE, ...) {
+  r_squared <- if (bias_correction) {
+    r^2 - 1/N_refpop
+  } else {
+    r^2
+  }
+  ld <- lapply(cat_mems, function(.) colSums(r_squared[.,]))
   dat <- as.data.frame(ld)
   names(dat) <- paste0("ld", 1:length(ld))
   rhs <- paste(names(dat), collapse = "+")
   dat$zz <- z1 * z2
-  wt <- if (weighted) {1 / (var(dat$zz) * colSums(r^2))} else NULL
+  wt <- if (weighted) {1 / (var(dat$zz) * colSums(r_squared))} else NULL
   fit <- lm(data = dat, formula(paste0("zz ~ ", rhs)), weights = wt)
   upsilon <- coef(fit)[-1] / sqrt(N1 * N2)
 
@@ -32,7 +38,7 @@ getfit.list <- function(x) {
 }
 
 jackknife <- function(z1, z2, r, cat_mems, N1, N2, blocks = 20,
-                      weighted = FALSE, ...) {
+                      weighted = FALSE, bias_correction = TRUE, ...) {
   num_jblks <- blocks
   N_snp <- dim(r)[1]
   jblk_ind <- cut(1:N_snp, num_jblks, labels = FALSE)
@@ -45,10 +51,11 @@ jackknife <- function(z1, z2, r, cat_mems, N1, N2, blocks = 20,
       x <- .[. %in% sel]
       sapply(x, function(y) y - sum(unsel < y))
     })
-    getfit(z1[sel], z2[sel], r[sel, sel], cat_mems_sel, N1, N2,
-           weighted = weighted)
+    getfit(z1[sel], z2[sel], r[sel, sel], cat_mems_sel, N1, N2, N_refpop,
+           weighted = weighted, bias_correction = bias_correction)
   }))
-  upsilon_hat <- getfit(z1, z2, r, cat_mems, N1, N2, weighted = weighted)
+  upsilon_hat <- getfit(z1, z2, r, cat_mems, N1, N2, N_refpop,
+                        weighted = weighted, bias_correction = bias_correction)
   #jk_est <- sum(upsilon_hat - jk_reps + (jblk_size * jk_reps) / N_snp)
   jk_est <- rowSums(mapply(jk_reps, jblk_size, FUN = function(jk_rep, size) {
     upsilon_hat - jk_rep + (size * jk_rep) / N_snp
