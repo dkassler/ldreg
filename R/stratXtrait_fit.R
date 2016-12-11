@@ -66,15 +66,18 @@ find_jblks <- function(r, blocks) {
 }
 
 jackknife <- function(z1, z2, r, cat_mems, N1, N2, N_refpop, blocks = 20,
-                      weighted = FALSE, bias_correction = TRUE, ...) {
+                      weighted = FALSE, bias_correction = TRUE,
+                      find_blocks = TRUE, ...) {
   num_jblks <- blocks
   N_snp <- dim(r)[1]
-  #jblk_ind <- cut(1:N_snp, num_jblks, labels = FALSE)
-  jblk_ind <- find_jblks(r, num_jblks)
-  saveLSF(jblk_ind, "jblk_ind")
-  num_jblks <- length(unique(jblk_ind))
+  if (!find_blocks) {
+    jblk_ind <- cut(1:N_snp, num_jblks, labels = FALSE)
+  } else {
+    jblk_ind <- find_jblks(r, num_jblks)
+    saveLSF(jblk_ind, "jblk_ind")
+    num_jblks <- length(unique(jblk_ind))
+  }
   jblk_size <- tapply(jblk_ind, jblk_ind, length)
-
   jk_reps <- unname(lapply(1:num_jblks, function(i) {
     sel <- which(jblk_ind != i)
     unsel <- which(jblk_ind == i)
