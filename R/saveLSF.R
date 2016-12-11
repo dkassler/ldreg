@@ -5,6 +5,7 @@ save_rng <- function(savefile=tempfile()) {
     #stop("don't know how to save before set.seed() or r*** call")
     warning(".Random.seed does not yet exist. Creating seed to save.")
     invisible(runif(1))
+    oldseed <- get(".Random.seed", .GlobalEnv)
   }
   oldRNGkind <- RNGkind()
   save("oldseed","oldRNGkind",file=savefile)
