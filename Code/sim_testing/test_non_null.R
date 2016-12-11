@@ -17,7 +17,8 @@ x1 <- rand_sim_data(N_snp = size, N1 = size, N_refpop = size,
 set.seed(NULL)
 
 #saveLSF(.Random.seed, "seed")
-restore_rng(sprintf("output/test_non_null/2016-12-11/out/seed.%s.rds", getopts()$jobindex))
+saveLSF_rng("seed")
+#restore_rng(sprintf("output/test_non_null/2016-12-11/out/seed.%s.rds", getopts()$jobindex))
 
 x2 <- do.call(sim1, x1)
 #jack <- do.call(jackknife, c(x2, x1, jack_args))

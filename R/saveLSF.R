@@ -30,6 +30,6 @@ saveLSF <- function(x, name) {
 
 saveLSF_rng <- function(name = "seed") {
   opts <- getopts()
-  path <- file.path(opts$outdir, sprintf("%s.%s.rds", name, opts$jobindex))
+  path <- file.path(opts$outdir, sprintf("%s.%s", name, opts$jobindex))
   save_rng(path)
 }
