@@ -71,6 +71,7 @@ jackknife <- function(z1, z2, r, cat_mems, N1, N2, N_refpop, blocks = 20,
   N_snp <- dim(r)[1]
   #jblk_ind <- cut(1:N_snp, num_jblks, labels = FALSE)
   jblk_ind <- find_jblks(r, num_jblks)
+  saveLSF(jblk_ind, "jblk_ind")
   num_jblks <- length(unique(jblk_ind))
   jblk_size <- tapply(jblk_ind, jblk_ind, length)
 

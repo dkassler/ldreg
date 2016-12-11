@@ -16,8 +16,8 @@ set.seed(NULL)
 saveLSF(.Random.seed, "seed")
 
 x2 <- do.call(sim1, x1)
-jack <- do.call(jackknife, c(x2, x1, jack_args))
+#jack <- do.call(jackknife, c(x2, x1, jack_args))
 jack_wt <- do.call(jackknife, c(x2, x1, weighted = TRUE, jack_args))
 
-saveLSF(jack, "jack")
+#saveLSF(jack, "jack")
 saveLSF(jack_wt, "jack_wt")
