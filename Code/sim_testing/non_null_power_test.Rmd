@@ -14,13 +14,15 @@ The goal of this analysis is to drill down further into the apparent disappearen
 library(ggplot2)
 library(foreach)
 library(dplyr)
+
+true_upsilon <- c(-2.84507392318969e-05, -3.35384263223196e-05, 4.43856550207098e-05)
 ```
 
 # Old Non-Null Results
 
 Checking the old save files, we can see that it __was__ estimating values relatively well.
 
-```{r}
+```{r, eval = T}
 jack <- readRDS("output/old/test_non_null.output.jack_wt.all.rds")
 foreach(i = 1:100, .combine = bind_rows) %do% 
 {
@@ -37,7 +39,54 @@ foreach(i = 1:100, .combine = bind_rows) %do%
 
 ```
 
-But now it isn't. What happened?
+#Current Version (Problems)
+
+But now it isn't.
+
+```{r, eval = T}
+.tmp <- foreach(r = c("emp", "true"), .combine = bind_rows) %:%
+  foreach(wt = c("nowt", "wt"), .combine = bind_rows) %:%
+  foreach(i = 1:100, .combine = bind_rows, .errorhandling = "remove") %do% {
+    jack <- readRDS(sprintf("Output/pass_true_r_non_null/2016-11-30b/out/jack.%s.%s.%s.rds", wt, r, i))
+    jack %>% 
+      as.data.frame() %>% 
+      tibble::rownames_to_column(var = "group") %>% 
+      tidyr::gather("var", "value", -group) %>% 
+      mutate(index = i, wt = (wt == "wt"), r = r)
+  } %>% 
+  mutate(group = readr::parse_number(group),
+         true_val = true_upsilon[group])
+.tmp %>%
+  tidyr::spread(var, value) %>% 
+  mutate(cover_zero = (estim - 2*se < 0) & (estim + 2*se > 0),
+         cover_true = (estim - 2*se < true_val) & (estim + 2*se > true_val),
+         group = readr::parse_number(group)) %>% 
+  group_by(wt, r, group) %>% 
+  summarize(
+    "CI Cov 0" = scales::percent(mean(cover_zero)),
+    "CI Cov True" = scales::percent(mean(cover_true)),
+    "Avg J.Est" = mean(estim),
+    "Avg Est" = mean(upsilon_hat),
+    "J.Bias" = mean(estim - true_val),
+    "Bias" = mean(upsilon_hat - true_val),
+    "Avg J.SE" = mean(se),
+    "SD J.Est" = sd(estim),
+    "SD Est" = sd(upsilon_hat)
+  ) %>% 
+  {knitr::kable(.)}
+```
+
+```{r, eval = T}
+ggplot(data = .tmp %>% 
+         tidyr::spread(var, value)) +
+  geom_density(aes(x = upsilon_hat, color = factor(group), linetype = wt)) +
+  geom_vline(aes(xintercept = true_val, color = factor(group))) +
+  theme_bw() +
+  labs(x = "Estimated Upsilon", title = "Density Plot of Estimates")
+  
+```
+
+What happened?
 
 # Git revert
 
@@ -168,7 +217,60 @@ ggplot(data = .tmp %>%
 
 ```
 
-This adjustment makes the outliers go away. Now, let's do a side by side comparison of the `getfit` functions to see what the difference is.
+This adjustment makes the outliers go away. A side by side comparison of the `getfit` functions shows that there are two differences: the use of bias correction, and the modifications to jackknife procedures that look for the best points to break the blocks on. 
+
+#Bias Correction
+
+First, we'll try reintroducing the bias correction to see if the problem reapppears.
+
+
+```{r}
+
+.tmp <- foreach(wt = c("", "_wt"), .combine = bind_rows) %:%
+  foreach(i = 1:100, .combine = bind_rows, .errorhandling = "remove") %do% {
+    jack <- readRDS(sprintf("Output/test_non_null/2016-12-10/out/jack%s.%s.rds", wt, i))
+    jack %>% 
+      as.data.frame() %>% 
+      tibble::rownames_to_column(var = "group") %>% 
+      tidyr::gather("var", "value", -group) %>% 
+      mutate(index = i, wt = (wt == "_wt"))
+  } %>% 
+  mutate(group = readr::parse_number(group),
+         true_val = true_upsilon[group])
+.tmp %>%
+  tidyr::spread(var, value) %>% 
+  mutate(cover_zero = (estim - 2*se < 0) & (estim + 2*se > 0),
+         cover_true = (estim - 2*se < true_val) & (estim + 2*se > true_val),
+         group = readr::parse_number(group)) %>% 
+  group_by(wt, group) %>% 
+  summarize(
+    "CI Cov 0" = scales::percent(mean(cover_zero)),
+    "CI Cov True" = scales::percent(mean(cover_true)),
+    "Avg J.Est" = mean(estim),
+    "Avg Est" = mean(upsilon_hat),
+    "J.Bias" = mean(estim - true_val),
+    "Bias" = mean(upsilon_hat - true_val),
+    "Avg J.SE" = mean(se),
+    "SD J.Est" = sd(estim),
+    "SD Est" = sd(upsilon_hat)
+  ) %>% 
+  {knitr::kable(.)}
+
+ggplot(data = .tmp %>% 
+         tidyr::spread(var, value)) +
+  geom_density(aes(x = upsilon_hat, color = factor(group), linetype = wt)) +
+  geom_vline(aes(xintercept = true_val, color = factor(group))) +
+  theme_bw() +
+  labs(x = "Estimated Upsilon", title = "Density Plot of Estimates")
+
+```
+
+This suggests that it's the block finding for jackknife that's interfering with the non-null outcomes.
+
+#Jackknife Block Finding
+
+Going back to master branch, we'll test this by saving out the jackknife block divisions to take a further look.
+
 
 
 
