@@ -271,6 +271,44 @@ This suggests that it's the block finding for jackknife that's interfering with 
 
 Going back to master branch, we'll test this by saving out the jackknife block divisions to take a further look.
 
+```{r}
 
+.tmp <- foreach(i = 1:100, .combine = bind_rows, .errorhandling = "remove") %do% {
+    jack <- readRDS(sprintf("Output/test_non_null/2016-12-11b/out/jack%s.%s.rds", wt, i))
+    jack %>% 
+      as.data.frame() %>% 
+      tibble::rownames_to_column(var = "group") %>% 
+      tidyr::gather("var", "value", -group) %>% 
+      mutate(index = i)
+  } %>% 
+  mutate(group = readr::parse_number(group),
+         true_val = true_upsilon[group])
+.tmp %>%
+  tidyr::spread(var, value) %>% 
+  mutate(cover_zero = (estim - 2*se < 0) & (estim + 2*se > 0),
+         cover_true = (estim - 2*se < true_val) & (estim + 2*se > true_val),
+         group = readr::parse_number(group)) %>% 
+  group_by(group) %>% 
+  summarize(
+    "CI Cov 0" = scales::percent(mean(cover_zero)),
+    "CI Cov True" = scales::percent(mean(cover_true)),
+    "Avg J.Est" = mean(estim),
+    "Avg Est" = mean(upsilon_hat),
+    "J.Bias" = mean(estim - true_val),
+    "Bias" = mean(upsilon_hat - true_val),
+    "Avg J.SE" = mean(se),
+    "SD J.Est" = sd(estim),
+    "SD Est" = sd(upsilon_hat)
+  ) %>% 
+  {knitr::kable(.)}
 
+ggplot(data = .tmp %>% 
+         tidyr::spread(var, value)) +
+  geom_density(aes(x = upsilon_hat, color = factor(group))) +
+  geom_vline(aes(xintercept = true_val, color = factor(group))) +
+  theme_bw() +
+  labs(x = "Estimated Upsilon", title = "Density Plot of Estimates")
 
+```
+
+Okay, soooooooo... now the code on the master branch is producing non-weird results. No substantive changes made since the wacky results, though.
