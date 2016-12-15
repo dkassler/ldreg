@@ -223,7 +223,6 @@ This adjustment makes the outliers go away. A side by side comparison of the `ge
 
 First, we'll try reintroducing the bias correction to see if the problem reapppears.
 
-
 ```{r}
 
 .tmp <- foreach(wt = c("", "_wt"), .combine = bind_rows) %:%
@@ -274,7 +273,7 @@ Going back to master branch, we'll test this by saving out the jackknife block d
 ```{r}
 
 .tmp <- foreach(i = 1:100, .combine = bind_rows, .errorhandling = "remove") %do% {
-    jack <- readRDS(sprintf("Output/test_non_null/2016-12-11b/out/jack%s.%s.rds", wt, i))
+    jack <- readRDS(sprintf("Output/test_non_null/2016-12-11/out/jack%s.%s.rds", wt, i))
     jack %>% 
       as.data.frame() %>% 
       tibble::rownames_to_column(var = "group") %>% 
