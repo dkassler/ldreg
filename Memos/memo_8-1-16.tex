@@ -1,0 +1,129 @@
+\title{Update on Various Things}
+\author{Daniel Kassler}
+\date{\today}
+
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{subfig}
+
+\begin{document}
+\maketitle
+
+%\begin{abstract}
+%This is the paper's abstract \ldots
+%\end{abstract}
+
+%\tableofcontents
+
+\section{Simulating Better Fake Data}
+
+\subsection{Sampling Chromosome 22}
+
+We had discussed using Chromosome 22 to generate more realistic covariance matrices. After filtering out SNPs with minor allele count of less than 5, Chr. 22 has 145,573 SNPs. In previous weeks, I had used the first 1,000 of these SNPs to generate a covariance matrix, from which simulated data was drawn (using a mutlivariate normal with the given matrix). This approach has the advantage of a more realistically \emph{varied} structure for the covariance matrix, but had blocks of high LD that were too large relative to the size of the matrix.
+
+I have made two modifications to this approach. First, increase the number of SNPs drawn from Chr. 22 to 10,000; the simulated covariance matrix is now 6.8\% of the entire chromosome. I have made several changes in my programs that offer increased efficient in order to make working with a matrix of this size reasonable in R. Second, these SNPs are randomly sampled from across the chromosome, so that the size of the blocks is more accurate relative to the entire chromosome. The result is that on average, every 15th SNP in chromosome 22 appears in the sample covariance matrix that will be used for calculations.
+
+\begin{figure}
+\centering
+	\subfloat{
+		\includegraphics[width=2in]{chr22_0.png}
+	}
+	\subfloat{
+		\includegraphics[width=2in]{chr22_1.png}
+	}
+	\subfloat{
+		\includegraphics[width=2in]{chr22_2.png}
+	}
+\hspace{0in}
+	\subfloat{
+		\includegraphics[width=2in]{chr22_3.png}
+	}
+	\subfloat{
+		\includegraphics[width=2in]{chr22_4.png}
+	}
+	\subfloat{
+		\includegraphics[width=2in]{chr22_5.png}
+	}
+\hspace{0in}
+	\subfloat{
+		\includegraphics[width=2in]{chr22_6.png}
+	}
+	\subfloat{
+		\includegraphics[width=2in]{chr22_7.png}
+	}
+	\subfloat{
+		\includegraphics[width=2in]{chr22_8.png}
+	}
+\caption{Blocks from the chromosome 22 covariance matrix, ordered from left to right and top to bottom. Each block is approximately 1,100 SNPs long, and on average every 15th SNP appears in the downsampled covariance matrix.}
+\label{matheat}
+\end{figure}
+
+At this size, we can start to see some of the overall structure of the chromosome (see figure \ref{matheat} for a visual representation). I estimate that the largest features are LD blocks that may be up to 3000 SNPs long, though most of the chromosome is composed of significantly smaller blocks. Additionally, note the presence of several regions of near-perfect LD (dark blue blocks).
+
+\subsection{Jackknife}
+
+% latex table generated in R 3.2.5 by xtable 1.8-2 package
+% Thu Aug 04 16:20:50 2016
+\begin{table}[ht]
+\centering
+%\caption {Performance for Different Simulations}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{rlrrrrrrrrlrr}
+  \hline
+ & cov\_mode & N\_snp & blk\_size & blk\_fill & estim & se & tau\_hat & true\_tau & N\_sample & inci & error & error2 \\ 
+  \hline
+1 & diag & 1000 & 10 & 1.0 & 7.7E-04 & 7.8E-05 & 7.8E-04 & 8.0E-04 & 1000 & 93.5\% & -2.7E-05 & 0.0E+00 \\ 
+  2 & diag & 2000 & 10 & 1.0 & 4.0E-04 & 2.8E-05 & 4.0E-04 & 4.0E-04 & 2000 & 95.0\% & -4.0E-04 & 2.0E-07 \\ 
+  3 & diag & 4000 & 10 & 1.0 & 2.0E-04 & 9.6E-06 & 2.0E-04 & 2.0E-04 & 4000 & 95.0\% & -6.0E-04 & 4.0E-07 \\ 
+  4 & bdiag & 1000 & 3 & 0.5 & 7.9E-04 & 1.7E-04 & 8.0E-04 & 8.0E-04 & 1000 & 90.5\% & -1.2E-05 & 0.0E+00 \\ 
+  5 & bdiag & 1000 & 3 & 1.0 & 8.1E-04 & 2.0E-04 & 8.2E-04 & 8.0E-04 & 1000 & 90.0\% & 7.5E-06 & 0.0E+00 \\ 
+  6 & bdiag & 1000 & 10 & 0.2 & 7.5E-04 & 1.9E-04 & 7.8E-04 & 8.0E-04 & 1000 & 80.0\% & -5.0E-05 & 1.0E-07 \\ 
+  7 & bdiag & 1000 & 10 & 0.5 & 7.2E-04 & 2.8E-04 & 7.8E-04 & 8.0E-04 & 1000 & 82.0\% & -8.0E-05 & 1.0E-07 \\ 
+  8 & bdiag & 1000 & 10 & 0.8 & 6.8E-04 & 2.8E-04 & 7.5E-04 & 8.0E-04 & 1000 & 83.0\% & -1.2E-04 & 1.0E-07 \\ 
+  9 & bdiag & 1000 & 10 & 1.0 & 7.4E-04 & 3.0E-04 & 7.9E-04 & 8.0E-04 & 1000 & 81.5\% & -5.6E-05 & 2.0E-07 \\ 
+  10 & bdiag & 1000 & 100 & 0.5 & 2.8E-04 & 3.6E-04 & 7.3E-04 & 8.0E-04 & 1000 & 50.5\% & -5.2E-04 & 4.0E-07 \\ 
+  11 & bdiag & 1000 & 100 & 1.0 & 2.3E-04 & 3.6E-04 & 6.3E-04 & 8.0E-04 & 1000 & 55.5\% & -5.7E-04 & 4.0E-07 \\ 
+  12 & bdiag & 4000 & 10 & 1.0 & 1.9E-04 & 4.6E-05 & 1.9E-04 & 2.0E-04 & 4000 & 91.5\% & -6.1E-04 & 4.0E-07 \\ 
+  13 & distance & 1000 & 10 & 1.0 & 7.6E-04 & 1.3E-04 & 7.9E-04 & 8.0E-04 & 1000 & 91.5\% & -3.9E-05 & 0.0E+00 \\ 
+  14 & custom & 1000 & 10 & 1.0 & 2.0E-04 & 2.8E-04 & 7.1E-04 & 8.0E-04 & 1000 & 34.5\% & -6.0E-04 & 4.0E-07 \\ 
+  15 & custom & 10000 & 10 & 1.0 & 1.8E-05 & 5.9E-06 & 7.8E-05 & 8.0E-05 & 1000 & 0\% & -7.8E-04 & 6.1E-07 \\ 
+   \hline
+\end{tabular}
+}
+\caption{This table reproduces the table from last month's memo showing performance under different options for data simulation. The last row is new, and contains performance for the more faithfully downsampled Chr. 22 matrix.}
+\label{tabperform}
+\end{table}
+
+Using this new, more faithful sampling of Chr. 22 as a covariance matrix yields greater precision, but not (seemingly) a commensurate improvement in accuracy. The table \ref{tabperform} contains the values from jackknife simulations of the previous memo, with a row added for simulations from this new covariance matrix.
+
+\subsection{Simulating as Banded/Sparse Matrix}
+
+The two most computationally expensive parts of data simulation are
+\begin{enumerate}
+\item finding the nearest positive semidefinite matrix to a given matrix and
+\item drawing genotypes from the correlation matrix.
+\end{enumerate}
+The former task can be hastened by calculating an appropriate positive semidefinite matrix ahead of time or providing a nearly-positive semidefinite matrix (in which some eigenvalues are negative, but approximately zero) and ignoring the approximation step.
+
+Drawing genotypes can be sped up by taking advantage of sparsity (several R packages exist for this already), provided I can generate a suitable sparse covariance matrix. I have explored several algorithms for this (Bien \& Tibshirani, Hsieh et. al., Rothman), but only Hsieh et. al.'s QUIC algorithm has converged within 12 hours. This algorithm produces matrixes that resemble the original covariance matrix, but are overly sparse. I have not yet been able to test performance using these matrices..
+
+\section{Weighting}
+
+\begin{figure}
+\centering
+\subfloat{
+	\includegraphics[width=4in]{reg_points_chr22cov_1.png}
+}
+\hspace{0in}
+\subfloat{
+	\includegraphics[width=4in]{Rplot.png}
+}
+\caption{$\chi^2$ statistics plotted against LD scores for one batch of sample data using the downsampled Chr. 22. The black line is a line through the origin with slope equal to the true $\tau \cdot M$, the green line uses the empirical variance of the simulated SNP effect as an approximation of $\tau$, and the blue line uses the estimate of $\tau$ calculated via LD score regression.}
+\label{oddreg}
+\end{figure}
+
+Fits using the faithful sampling of Chr. 22 as covariance produce behavior like \ref{oddreg}. It seems to be an improvement in performance, but I cannot account for why the regression actually works in this scenario.
+
+\end{document}
+Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn

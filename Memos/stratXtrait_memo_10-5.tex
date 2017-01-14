@@ -1,0 +1,220 @@
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage{geometry} % to change the page dimensions
+\geometry{letterpaper} % or letterpaper (US) or a5paper or....
+\geometry{margin=1in} % for example, change the margins to 2 inches all round
+
+\usepackage{graphicx} % support the \includegraphics command and options
+\usepackage{amsmath, amssymb, amsthm}
+
+\newtheorem*{lemma}{Lemma}
+\newtheorem*{problem}{Problem}
+
+\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\normal}[1]{\mathcal{N}\left(#1\right)}
+\newcommand{\bmat}[1]{\begin{bmatrix} #1 \end{bmatrix}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\newcommand{\expectation}[1]{\E\left[#1\right]}
+\newcommand{\cov}[1]{\mathop{\text{cov}}\left(#1\right)}
+\newcommand{\diag}[1]{\mathop{\text{diag}}\left(#1\right)}
+%\newcommand{\newop}[2]{\newcommand{#1}[1]{\mathop{#2}\left(#1\right)}}
+\newcommand{~}[1]{^{\left(#1\right)}}
+
+\title{Stratified Cross-Trait LD Score Regression: Proof and Early Simulation Results}
+\author{Daniel Kassler}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\maketitle
+
+\section{Model}
+
+Suppose we have samples of two traits, $y_1$ and $y_2$, with sample sizes $N_1$ and $N_2$ respectively, with $N_s$ samples occurring in both sample populations. Let the dependence of these traits on a set of $M$ SNPs be given by
+\begin{align*}
+y_1 &= X \beta + \epsilon \\
+y_2 &= Z \gamma + \delta.
+\end{align*}
+Here, $y_1 \in N_1 \times 1$ and $y_2 \in N_2 \times 1$ are vectors of traits as measured in their respective sample populations, standardized to have mean $0$ and variance $1$. The matrices $X \in N_1 \times M$ and $Z \in N_2 \times M$ give the level of each SNP in each member of the sample populations, and have standardized columns. The vectors $\beta, \gamma \in M \times 1$ give the effect of each SNP on the traits $y_1$ and $y_2$ respectively.
+
+We further suppose that the SNPs, which shall be indexed $1:M$, are broken into (potentially overlapping) subgroups such that each SNP is in at least one subgroup. For each SNP $j$ we model its effect  on the two traits as 
+\begin{equation*}
+\left(\beta_j, \gamma_j \right) \sim \normal{0, \bmat{v_j & p_j \\ p_j & u_j}}.
+\end{equation*}
+We can imagine that the effect of each SNP $j$ could be further broken down into contributions from each category $c$ of which $j$ is a member:
+\begin{align*}
+\beta_j &= \sum\limits_{c \mid j \in c} \beta_{jc} \\
+\gamma_j &= \sum\limits_{c \mid j \in c} \gamma_{jc}.
+\end{align*}
+Supposing these SNP-category-level effects are also normally distributed, we then model them as
+\begin{align*}
+\left(\beta_{jc}, \gamma_{jc} \right) \sim \normal{0, \bmat{\tau_c & \upsilon_c \\ \upsilon_c & \sigma_c}}.
+\end{align*}
+This would indicate that
+\begin{align*}
+v_j &= \sum\limits_{c \mid j \in c} \tau_c \\
+u_j &= \sum\limits_{c \mid j \in c} \sigma_c \\
+p_j &= \sum\limits_{c \mid j \in c} \upsilon_c .
+\end{align*}
+We are interested in determining the quantities $\upsilon_c$ for each category.
+
+\subsection{Independence}
+
+We make certain assumptions about the independence of variables in this model. We do not assume independence of $\delta$ and $\epsilon$, or of $\gamma$ and $\beta$. And $X$ and $Z$ are identical on the $N_s$ samples which appear in both studies. Otherwise, we assume $\epsilon, \delta, \beta, \gamma, X, \text{ and } Z$ to be pairwise independent. We also assume that SNP effects and trait samples are independent of each other.
+
+\subsection{Proposition}
+The following equation describes the product of the $z$-scores of $y_1$ and $y_2$ under this model
+\begin{equation}\label{proposition}
+\expectation{z_{1j} z_{2j}} =  \sqrt{N_1 N_2} \sum_c \ell_j(c) \upsilon_c + \frac{N_s \rho}{\sqrt{N_1 N_2}}.
+\end{equation}
+
+\section{Proof}
+
+Consider the product of the \emph{z}-scores of each trait. Following the derivation of cross-strait LD score regression, we arrive at
+\begin{equation}\label{exp1}
+\expectation{z_{1j} z_{2j} \mid X, Z} = \frac{1}{\sqrt{N_1 N_2}} X_j \left( X \expectation{\beta \gamma^\top} Z^\top + \expectation{\epsilon \delta^\top} \right) Z_j.
+\end{equation}
+We expand out
+\begin{align*}
+\expectation{\beta \gamma^\top} &= \cov{\beta, \gamma} + \expectation{\beta} \expectation{\gamma}^\top \\
+&=\cov{\beta, \gamma} \\
+&=\diag{p}
+\end{align*}
+where the first equality follows from the distribution for $\beta$ and $\gamma$ being centered at $0$, and the second follows from our model assumption that the SNP effects were drawn independently, and our definition of $p_j = \cov{\beta_j, \gamma_j}$. Similarly, we arrive at 
+\begin{equation*}
+\expectation{\epsilon \delta^\top} = \diag{\rho_e} = \rho_e I,
+\end{equation*}
+where $\rho_e$ is the correlation in the error terms on the overlapping samples.
+Returning to equation $\eqref{exp1}$, we now have
+\begin{equation}\label{exp2}
+\expectation{z_{1j} z_{2j} \mid X, Z} =  \frac{1}{\sqrt{N_1 N_2}} \left( X_j^\top X \diag{p} Z^\top Z_j + \rho_e X_j^\top Z_j \right).
+\end{equation}
+%We can expand out the inner products in the first term of equation \eqref{exp2} and break up the resulting sums into shared and non-shared components. The independence of the non-shared components then gives us:
+%\begin{align*}
+% X_j^\top X \diag{p} Z^\top Z_j &= \sum_{k=1}^M X_j^\top X_k p_k Z_k^\top Z_j \\
+%&= \sum_{k=1}^M \left( \sum_{i = 1}^{N_1} X_{ij} X_{ik} \right) \left( \sum_{i = 1}^{N_2} Z_{ij} Z_{ik} \right) \\
+%&= \sum_{k=1}^M \left( \left( \sum_{i = 1}^{N_s} X_{ij} X_{ik} \right) \left( \sum_{i = 1}^{N_s} Z_{ij} Z_{ik} \right) + 0 \right) p_k\\
+%&= \sum_{k=1}^M \hat{r}_{jk}^2 N_s^2 p_k.
+%% &= \sum_{k=1}^M \hat{r}_{jk}~1 N_1 p_k \hat{r}_{jk}~2 N_2.
+%\end{align*}
+%Since the term $\hat{r}^2_{jk}$ is an approximation for the true correlation taken over $N_s$ overlapping samples, we have a known bias $\hat{r}_{jk}^2 \approx r_{jk}^2 + \frac{1}{N_s}$. Thus, the terms above can be approximated by
+Following the derivation of Cross-trait LD score regression, we can make the approximation
+\begin{align*}
+X_j^\top X \diag{p} Z^\top Z_j &\approx \sum_{k=1}^M \left(N_1 N_2 r_{jk}^2 + N_s \right) p_k.
+\end{align*}
+Meanwhile, expanding the second term of \eqref{exp2} gives us
+\begin{align*}
+ X_j^\top \rho_e I Z_j &= N_s \rho_e.
+\end{align*}
+
+%\begin{problem}
+%If the above steps are correct, then first term of the cross trait LD score regression equation would be off by a factor of $\frac{N_s^2}{N_1 N_2}$. Assuming, however, that it is not, there is some error in my logic above that needs to be fixed. For now, we shall assume that I arrive at a similar result to cross-trait LD score regression, where this note stands in for some magic that brings us back in line with existing material.
+%\end{problem}
+
+%\begin{equation}
+%\expectation{z_{1j} z_{2j} \mid X, Z} =  \sqrt{N_1 N_2}  \sum_{k=1}^M \hat{r}_{jk}~1 \hat{r}_{jk}~2 p_k + \frac{N_s \rho_e}{\sqrt{N_1 N_2}}.
+%\end{equation}
+
+%\begin{lemma}\label{expansion}
+%We want to be able to expand $\hat{r}_{jk}~1 \hat{r}_{jk}~2 = r_{jk} + A$, where $A$ is some unknown term. When the two studies are the same, $A = \frac1{N}$. In order for cross-trait LD score regression to work, it seems that we must have $A = \frac{N_s}{N_1 N_2}$ when the two studies are different, but my derivations keep turning up $A = \frac{1}{N_s}$. I can't account for this at all, despite many hours of scribbling and pacing.
+%\end{lemma}
+
+By taking the expectation over $X$ and $Z$, we arrive at the following equation:
+\begin{equation}
+\expectation{z_{1j} z_{2j}} =  \sqrt{N_1 N_2}  \sum_{k=1}^M r_{jk}^2 p_k + \frac{N_s}{\sqrt{N_1 N_2}}\left(\rho_e + \sum_{k=1}^M p_k\right).
+\end{equation}
+Using the definitions from our model, we can expand the first term as
+\begin{equation*}
+\sum_{k=1}^M r_{jk}^2 p_k = \sum_{k=1}^M r_{jk}^2 \sum_{c \mid k \in c} \upsilon_c = \sum_c  \upsilon_c \sum_{k \in c} r_{jk}^2 = \sum_c \upsilon_c \ell_j(c) 
+\end{equation*}
+giving us
+\begin{equation}
+\expectation{z_{1j} z_{2j}} =  \sqrt{N_1 N_2} \sum_c \ell_j(c) \upsilon_c + \frac{N_s}{\sqrt{N_1 N_2}}\left(\rho_e + \sum_{k=1}^M p_k\right).
+\end{equation}
+
+\begin{lemma}
+The total covariance for the model, $\rho = \cov{y_1, y_2}$, is equal to $\rho_e + \sum_{k=1}^M p_k$.
+\begin{proof}
+We calculate $\rho$ directly:
+\begin{align*}
+\rho = \cov{y_1, y_2}  = \expectation{y_1 ^\top y_2} - \expectation{y_1} \expectation{y_2}.
+\end{align*}
+Since the traits are centered at $0$, the second term vanishes, leaving us with
+\begin{align*}
+\expectation{y_1 ^\top y_2} &= \expectation{(X\beta + \epsilon) ^\top (Z\gamma + \delta)} \\
+&= \expectation{X\beta ^\top Z\gamma + X\beta\delta + \epsilon Z \gamma + \epsilon\delta} \\
+&= \expectation{X\beta ^\top Z\gamma} + \expectation{\epsilon \delta}.
+\end{align*}
+Since $X$ and $Z$ agree on the first $N_s$ samples, we have
+\begin{align*}
+&= \frac{1}{N_s} \sum_{i=1}^{N_s} \left((X_{(i)} ^\top \beta )^\top Z_{(i)} ^\top \gamma \right) + \rho_e \\
+&= \frac{1}{N_s} \sum_{i=1}^{N_s} \sum_{k, j = 1}^M X_{ji} \beta_j Z_{ki} \gamma_k + \rho_e \\
+&= \sum_{j, k = 1}^M \expectation{X_j \beta_j Z_k \gamma_k} + \rho_e \\
+&= \sum_{j, k = 1}^M \left(\cov{X_j\beta_j, Z_k \gamma_k} + \expectation{X_j\beta_j} \expectation{Z_k\gamma_k}\right) + \rho_e
+\end{align*}
+The second term in the internal sum vanishes since the variables involved are centered. The first term, $\cov{X_j\beta_j, Z_k \gamma_k}$, is zero when $j \neq k$, and when $j = k$ we have:
+\begin{align*}
+\cov{X_k \beta_k, Z_k \gamma_k} &= \expectation{X_k \beta_k Z_k \gamma_k} \\
+&=\cov{X_k Z_k, \beta_k \gamma_k} + \expectation{X_k Z_k} \expectation{\beta_k \gamma_k} \\
+&=\expectation{X_k Z_k} \expectation{\beta_k \gamma_k} \\
+&=\expectation{\beta_k \gamma_k} \\
+&=p_k.
+\end{align*}
+Therefore, 
+\begin{equation*}
+\rho = \cov{y_1, y_2} = \rho_e + \sum_{k=1}^M p_k.
+\end{equation*}
+\end{proof}
+\end{lemma}
+
+%Using this result, we arrive at the following equation, which is our primary equation for stratified cross-trait LD score regression:
+%\begin{equation}
+%\expectation{z_{1j} z_{2j}} =  \sqrt{N_1 N_2} \sum_c \ell_j(c) \upsilon_c + \frac{N_s \rho}{\sqrt{N_1 N_2}}.
+%\end{equation}
+Using this result, we arrive at equation \eqref{proposition}, our equation for stratified cross-trait LD score regression.
+
+\section{Initial Results}
+
+There are many potential simulations by which to test the efficacy of this method, several of which have been tried so far. However, in the interest of highlighting the approach which ``puts the method through its paces'' the most, we will focus here on results from the following approach: 
+\begin{enumerate}
+\item Generate a covariance matrix from which to draw genotypes from for sample populations. This can be generated in a number of different ways, which are more or less realistic and more or less friendly to the algorithm.
+\item Given a number of subgroups and a number of SNPs in each, randomly assign SNPs to (potentially multiple) subgroups. In tests so far, we have used three subgroups representing 100\%, 40\%, and 25\% of SNPs.
+\item Generate positive-definite $2\times2$ matrices for each category to use for determining SNP effect sizes toward each of $2$ traits. These matrices were randomly generated, but subsequently sorted for matrices with good separation between $\upsilon$ values for easier testing. Divide these matrices by sum of the sizes of the categories, in order to ensure the total variance remains less than one.
+\item Draw genotypes for (overlapping) sample populations and the reference population from a multivariate normal distribution cenetered on 0 and using this matrix as the variance-covariance matrix.
+\item Draw SNP effects using the category-level covariance matrices.
+\item Generate random error such that the outcome variances will be (approximately) equal to one, and generate outcomes according to the model. Using these outcomes, generate $z$-scores for each trait.
+\item Repeat the previous three steps 100 times, fitting the model to each set of data, in order to model a distribution of possible estimated $\upsilon$ values.
+\end{enumerate}
+
+\begin{figure}
+\begin{centering}
+\includegraphics[width = 5in]{small_est_ups.png}
+\caption{The distribution of estimated LD score coefficients (curves) correctly identifies the true value (vertical lines) of the within-subgroup correlation near the mean, but variances are too large to properly distinguish.}
+\label{small_est_ups}
+\end{centering}
+\end{figure}
+
+Initial results for small sample sizes (1,000 SNPs, 1,000 samples in the reference and study populations) showed early promise; on average the synthesis LD score regression method was able to identify the true upsilon values (see figure \ref{small_est_ups}), which were near the mean of the distributions of estimated LD score coefficients. However, the variance of these distributions was substantial compared to the separation between true $\upsilon$ values, so we proceeded to larger sample sizes.
+
+\begin{figure}
+\begin{centering}
+\includegraphics[width = 5in]{bdiag_est_ups.png}
+\caption{Scaling up to 10,000 SNPs and 10,000 samples in the reference and study populations (with 2,000 overlapping samples in study populations) offers modest but not substantial increases in separation.}
+\label{bdiag_est_ups}
+\end{centering}
+\end{figure}
+
+\begin{figure}
+\begin{centering}
+\includegraphics[width = 5in]{realistic_est_ups.png}
+\caption{A more realistic correlation structure of genotypes makes estimation much more difficult. Here, the true values of $\upsilon$ still lie near the mean of the distributions of estimated values, but those distributions are heavily overlapping.}
+\label{realistic_est_ups}
+\end{centering}
+\end{figure}
+
+Sampling at larger sizes has proven so far to be difficult owing to the large amount of computation time required: scaling up by a factor of 10 (to 10,000 SNPs and 10,000 samples in the reference and study populations) resulted in computations that lasted nearly 24 hours. Despite the substantial increase in computation time, results have not increased commensurately in accuracy. Using a genotype covariance matrix composed of small blocks (on average, $3\times3$) of $1$s along the diagonal results in the distributions of estimates shown in figure \ref{bdiag_est_ups}, which indicates only modestly better separation of LD-score coefficients. Figure \ref{realistic_est_ups}, meanwhile, shows results for simulated data generated using a more realistic covariance matrix created by downsampling SNPs on chromosome 22, and exhibits substantially less separation.
+
+It is likely that introducing weighting into the LD score regression would improve results, and this is one of the more immediate potential directions for future simulations.
+
+\end{document}
