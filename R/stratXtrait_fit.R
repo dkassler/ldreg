@@ -1,4 +1,4 @@
-getfit_strat <- function(chi2, r, cat_mems, N,
+getfit_strat <- function(chi2, r, cat_mems, N, N_refpop,
                          bias_correction = TRUE, ...) {
   r_squared <- if (bias_correction) {
     r^2 - 1/N_refpop

@@ -29,6 +29,7 @@ saveLSF <- function(x, name) {
 }
 
 saveLSF_rng <- function(name = "seed") {
+  invisible(runif(1)) # make sure RNG is initialized
   opts <- getopts()
   path <- file.path(opts$outdir, sprintf("%s.%s", name, opts$jobindex))
   save_rng(path)
