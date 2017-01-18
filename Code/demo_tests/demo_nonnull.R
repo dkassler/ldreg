@@ -1,6 +1,5 @@
-# This script is a demonstration that the ldreg package does not produce false
-# positives when estimating covariance. It is a cleaned version of
-# test_null.R in sim_testing.
+# This script is a demonstration of the power of the method, testing non-null
+# versions
 
 library(ldreg)
 w10ks <- readRDS("data/w10ks.rds")
@@ -24,7 +23,12 @@ sim_param <- rand_sim_data(
   Ns = 3E3,
   N_refpop = 1E3,
   cat_props = c(1, 0.6, 0.3, 0.1),
-  cat_mats = rep(list(matrix(c(0.8, 0, 0, 0.5), nrow = 2)), 4)
+  cat_mats = list(
+    cov2x2(.8, .8, .3),
+    cov2x2(.8, .8, .7),
+    cov2x2(.8, .8, -.1),
+    cov2x2(.8, .8, -.7)
+  )
 )
 
 sim_data <- do.call(sim_2trait, sim_param)
