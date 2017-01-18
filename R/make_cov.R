@@ -21,3 +21,5 @@ matheat <- function(r, ...) {
   pal <- pal[(rg[1]):(rg[2])]
   heatmap(r, ..., Rowv = NA, symm = TRUE, scale = "none", col = pal, labRow = NA, labCol = NA)
 }
+
+cov2x2 <- function(tau1, tau2, upsilon) matrix(c(tau1, upsilon, upsilon, tau2), nrow = 2)
