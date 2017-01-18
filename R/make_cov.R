@@ -14,3 +14,10 @@ make_cov.bdiag <- function(N, size, blk = 1) {
   Matrix::bdiag(blocks)
 }
 
+matheat <- function(r, ...) {
+  pal <- plotrix::smoothColors(scales::muted("red"), 100, "white", 100, scales::muted("blue"))
+  rg <- range(r, na.rm = T)
+  rg <- round((rg + 1) * 101 + 1)
+  pal <- pal[(rg[1]):(rg[2])]
+  heatmap(r, ..., Rowv = NA, symm = TRUE, scale = "none", col = pal, labRow = NA, labCol = NA)
+}
