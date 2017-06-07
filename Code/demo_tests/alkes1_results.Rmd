@@ -1,0 +1,114 @@
+---
+title: "Materials for Meeting"
+author: "Daniel Kassler"
+date: "January 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_knit$set(root.dir = "~/Research/ldreg")
+
+library(ggplot2)
+library(foreach)
+library(dplyr)
+```
+
+```{r data_sources}
+null_data_formstr <- "Output/test_null/2016-11-30/out/jack_wt.%s.rds"
+non_null_data_formstr <- "Output/test_non_null/2016-12-14/out/jack_wt.%s.rds"
+
+```
+
+
+Unless otherwise specified, $M = N1 = N2 = N_{ref} = 10,000$ and $N_{shared} = 3,000$. SNPs are randomly assigned into groups $2$ and $3$, comprising $25\%$ and $40\%$ of the total number of SNPs respectively; group $1$ consists of all SNPs. Jackknife estimation is performed with 200 blocks.
+
+#Null Test
+
+```{r, include = F, results = 'hide'}
+jack <- foreach(i = 1:100, .combine = bind_rows, .errorhandling = "remove") %do% {
+  jack <- readRDS(sprintf(null_data_formstr, i))
+  jack %>% 
+    as.data.frame() %>% 
+    tibble::rownames_to_column(var = "group") %>% 
+    tidyr::gather("var", "value", -group) %>% 
+    mutate(index = i)
+}
+```
+
+```{r, results = 'asis'}
+jack %>% 
+  tidyr::spread(var, value) %>% 
+  mutate(cover_zero = (estim - 2*se < 0) & (estim + 2*se > 0),
+         group = readr::parse_number(group)) %>% 
+  group_by(group) %>% 
+  summarize(
+    "CI Cov 0" = scales::percent(mean(cover_zero)),
+    "Avg J.Est" = mean(estim),
+    "Avg Est" = mean(upsilon_hat),
+    "Avg J.SE" = mean(se),
+    "SD J.Est" = sd(estim),
+    "SD Est" = sd(upsilon_hat)
+  ) %>% 
+  {knitr::kable(.)}
+  #{print(xtable::xtable(., ""), type = "html")}
+```
+
+```{r}
+ggplot(data = jack %>% 
+         tidyr::spread(var, value)) +
+  geom_density(aes(x = upsilon_hat, color = group)) + 
+  theme_bw() +
+  labs(x = "Estimated Upsilon", title = "Density Plot of Estimates")
+```
+
+#Non-Null Test
+
+```{r}
+true_upsilon <- c(-2.84507392318969e-05, -3.35384263223196e-05, 4.43856550207098e-05)
+
+```
+
+```{r, eval = T, warning = FALSE}
+.tmp <- foreach(i = 1:100, .combine = bind_rows, .errorhandling = "remove") %do% {
+    jack <- readRDS(sprintf(non_null_data_formstr, i))
+    jack %>% 
+      as.data.frame() %>% 
+      tibble::rownames_to_column(var = "group") %>% 
+      tidyr::gather("var", "value", -group) %>% 
+      mutate(index = i)
+  } %>% 
+  mutate(group = readr::parse_number(group),
+         true_val = true_upsilon[group])
+.tmp %>%
+  tidyr::spread(var, value) %>% 
+  mutate(cover_zero = (estim - 2*se < 0) & (estim + 2*se > 0),
+         cover_true = (estim - 2*se < true_val) & (estim + 2*se > true_val),
+         group = readr::parse_number(group)) %>% 
+  group_by(group) %>% 
+  summarize(
+    "CI Cov 0" = scales::percent(mean(cover_zero)),
+    "CI Cov True" = scales::percent(mean(cover_true)),
+    "Avg J.Est" = mean(estim),
+    "Avg Est" = mean(upsilon_hat),
+    "J.Bias" = mean(estim - true_val),
+    "Bias" = mean(upsilon_hat - true_val),
+    "Avg J.SE" = mean(se),
+    "SD J.Est" = sd(estim),
+    "SD Est" = sd(upsilon_hat)
+  ) %>% 
+  {knitr::kable(.)}
+  #{print(xtable::xtable(., ""), type = "html")}
+```
+
+In the plot below, the vertical lines indicate the true (non-null) values of $\upsilon$ for each group.
+
+```{r, eval = T}
+ggplot(data = .tmp %>% 
+         tidyr::spread(var, value)) +
+  geom_density(aes(x = upsilon_hat, color = factor(group))) +
+  geom_vline(aes(xintercept = true_val, color = factor(group))) +
+  theme_bw() +
+  labs(x = "Estimated Upsilon", title = "Density Plot of Estimates")
+  
+```

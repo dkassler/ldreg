@@ -2,7 +2,7 @@
 # versions
 
 library(ldreg)
-w10ks <- readRDS("data/w10ks.rds")
+#w10ks <- readRDS("data/w10ks.rds")
 
 saveLSF_rng()
 
@@ -18,7 +18,8 @@ if (N_snp > 1E4) stop("No support for more than 10,000 SNPs.")
 
 sim_param <- rand_sim_data(
   N_snp = N_snp,
-  .cov = w10ks,
+  #  .cov = w10ks,
+  .cov = make_cov.bdiag(N_snp, size = 3),
   N1 = 1E4,
   Ns = 3E3,
   N_refpop = 1E3,
