@@ -1,0 +1,71 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup}
+knitr::opts_knit$set(root.dir = here::here())
+library(tidyverse)
+```
+
+
+```{r}
+get_true_corr <- function(cat_mems, cat_mats) {
+  overlap <- sapply(cat_mems, function(x) sapply(cat_mems, function(y) {
+    length(intersect(x, y))
+  }))
+  
+  upsilon <- sapply(cat_mats, `[`, 1, 2)
+  tau1 <- sapply(cat_mats, `[`, 1, 1)
+  tau2 <- sapply(cat_mats, `[`, 2, 2)
+  
+  numerator <- overlap %*% upsilon
+  denominator <- sqrt((overlap %*% tau1) * (overlap %*% tau2))
+  #browser(expr = any(is.nan(denominator)))
+  return(drop(numerator/denominator))
+}
+
+get_run_stats <- function(index, dir) {
+  sim_param <- readRDS(sprintf("Output/%s/out/param.%d.rds", dir, index))
+  est <- readRDS(sprintf("Output/%s/out/est.%d.rds", dir, index))
+  
+  true_corr <- get_true_corr(sim_param$cat_mems, sim_param$cat_mats)
+  data.frame(
+    annot = seq(length(true_corr)),
+    est,
+    true_val = true_corr
+  ) %>% 
+    mutate(
+      cover_zero = (estim_hat - 2*se < 0) & (estim_hat + 2*se > 0),
+      cover_true = (estim_hat - 2*se < true_val) & (estim_hat + 2*se > true_val)
+    )
+}
+```
+
+```{r}
+df_nonnull <- map_df(1:200, get_run_stats, "corr_sim_nonnull/2017-06-08a")
+df_null <- map_df(1:200, get_run_stats, "corr_sim_null/2017-06-08b")
+```
+
+```{r}
+summarize_results <- function(dat) {
+dat %>%
+  group_by(annot) %>% 
+  summarize(
+    "CI Cov 0" = scales::percent(mean(cover_zero)),
+    "CI Cov True" = scales::percent(mean(cover_true)),
+    "Avg J.Est" = mean(estim),
+    "Avg Est" = mean(estim_hat),
+    "J.Bias" = mean(estim - true_val),
+    "Bias" = mean(estim_hat - true_val),
+    "Avg J.SE" = mean(se),
+    "SD J.Est" = sd(estim),
+    "SD Est" = sd(estim_hat)
+  ) %>% 
+  knitr::kable()
+}
+summarize_results(df_nonnull)
+summarize_results(df_null)
+```
+
+

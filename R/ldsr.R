@@ -14,7 +14,12 @@ ldsr <- function(ss, r, cat_mems, N_refpop, weighted = FALSE,
   rhs <- paste(names(dat), collapse = "+")
   dat$ss <- ss
 
-  wt <- if (weighted) {1 / (var(dat$ss) * colSums(r_squared))} else NULL
+  if (weighted) {
+    wt <- 1 / (var(dat$ss) * colSums(r_squared))
+    wt <- pmin(wt, 0)
+  } else {
+    wt <- NULL
+  }
 
   fit <- lm(data = dat, formula(paste0("ss ~ ", rhs)), weights = wt)
   return(fit)
@@ -42,7 +47,7 @@ stratx_corr <- function(z1, z2, r, cat_mems, N1, N2, N_refpop, ...) {
   }))
   numerator <- overlap %*% upsilon
   denominator <- sqrt((overlap %*% tau1) * (overlap %*% tau2))
-  browser(expr = any(is.nan(denominator)))
+  #browser(expr = any(is.nan(denominator)))
   return(drop(numerator/denominator))
 }
 

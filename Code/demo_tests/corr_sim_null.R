@@ -5,7 +5,9 @@ library(ldreg)
 
 # Control -----------------------------------------------------------------
 
-local <- FALSE
+..cluster <- TRUE
+..load <- FALSE
+..save <- FALSE
 
 jack_args <- list(
   blocks = 200,
@@ -17,7 +19,7 @@ jack_args <- list(
 N_snp <- 1E4
 if (N_snp > 1E4) stop("No support for more than 10,000 SNPs.")
 
-if (!local) saveLSF_rng()
+if (..cluster) saveLSF_rng()
 
 # Simulation --------------------------------------------------------------
 
@@ -35,9 +37,17 @@ sim_param <- rand_sim_data(
     cov2x2(.7, .7, 0)
   )
 )
-if (!local) saveLSF(sim_param, "param")
+if (..cluster) saveLSF(sim_param, "param")
 
 sim_data <- do.call(sim_2trait, sim_param)
+
+if (..cluster & ..save) saveLSF(sim_data, "data")
+if (..load) {
+  opts <- getopts()
+  sim_param <- readRDS(sprintf("output/corr_sim_null/2017-06-08a/out/param.%s.rds", opts$jobindex))
+  sim_data  <- readRDS(sprintf("output/corr_sim_null/2017-06-08a/out/data.%s.rds",  opts$jobindex))
+}
+
 est <- do.call(jk_stratx_corr, c(sim_param, sim_data, jack_args))
 
-if (!local) saveLSF(est, "est")
+if (..cluster) saveLSF(est, "est")
